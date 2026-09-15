@@ -211,12 +211,7 @@ export default function TensorCanvas({
                     cursor: 'pointer',
                   }}
                 >
-                  <title>
-                    {masked
-                      ? 'Masked future token'
-                      : `[${r}, ${c}] = ${value.toFixed(5)}`}{' '}
-                    · click to inspect
-                  </title>
+                  <title>{`${masked ? 'Masked future token' : `[${r}, ${c}] = ${value.toFixed(5)}`} · click to inspect`}</title>
                   <rect
                     width={cellW - 4}
                     height="22"
