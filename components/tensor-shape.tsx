@@ -32,6 +32,14 @@ export default function TensorShape({
             (step === 7 && !output && index === 1))
         )
           axes = ['batch', 'heads', 'query tokens', 'key tokens'];
+        if (step === 5 && !output && index === 3)
+          axes = ['batch', 'heads', 'features per head', 'key tokens'];
+        if (step === 5 && !output && index === 1)
+          axes = ['batch', 'heads', 'query tokens', 'features per head'];
+        if (step === 7 && !output && index === 3)
+          axes = ['batch', 'heads', 'key tokens', 'value features'];
+        if (step === 7 && output)
+          axes = ['batch', 'heads', 'query tokens', 'value features'];
         if (step === 11 && output) axes = ['batch', 'tokens', 'vocabulary'];
         return (
           <span key={index}>
@@ -41,7 +49,7 @@ export default function TensorShape({
                 {i > 0 ? ', ' : ''}
                 <span
                   className={
-                    'dim ' +
+                    'dim dimension-with-label ' +
                     (axes[i].includes('token')
                       ? 'dim-token'
                       : axes[i] === 'heads'
@@ -53,7 +61,8 @@ export default function TensorShape({
                   title={`${axes[i]}: ${v}`}
                   aria-label={`${axes[i]} ${v}`}
                 >
-                  {v}
+                  <b>{v}</b>
+                  <small>{axes[i]}</small>
                 </span>
               </span>
             ))}

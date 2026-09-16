@@ -23,11 +23,17 @@ import TensorCanvas, {
 } from '../components/tensor-canvas';
 import { examples, runModel, getSteps } from '../lib/transformer';
 import TensorShape from '../components/tensor-shape';
+import OperationGuide from '../components/operation-guide';
+import Orientation, { tourSteps } from '../components/orientation';
+import { getDisplay } from '../components/tensor-canvas';
+import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
-  const [step, setStep] = useState(3),
+  const [step, setStep] = useState(0),
     [token, setToken] = useState(2),
     [numbers, setNumbers] = useState(false),
+    [focusToken, setFocusToken] = useState(false),
+    [tour, setTour] = useState<number | null>(0),
     [example, setExample] = useState(0),
     [projection, setProjection] = useState<Projection>('q'),
     [mlp, setMlp] = useState<MlpStage>('down'),
@@ -43,6 +49,7 @@ export default function Home() {
     current = steps[step];
   const navigate = useCallback((n: number) => {
     setStep(Math.max(0, Math.min(11, n)));
+    setTour(null);
     setSelection(null);
     setPhase(0);
   }, []);
@@ -159,6 +166,21 @@ export default function Home() {
     } catch {}
     return () => lifecycle.abort();
   }, [navigate, steps, words.length]);
+  const moveTour = (index: number) => {
+    setPlaying(false);
+    setFocusToken(false);
+    navigate(tourSteps[index]);
+    setTour(index);
+  };
+  const finishTour = () => {
+    navigate(0);
+    setPlaying(false);
+    setTour(null);
+  };
+  const scale = heatmapScale(
+    getDisplay(model, step, projection, mlp),
+    step === 6 || step === 11,
+  );
   const chosen = selection ?? { row: token, col: 0, head: 0 },
     calculation = inspect(model, step, projection, mlp, chosen);
   const shapeOut =
@@ -194,15 +216,20 @@ export default function Home() {
         <span className="lesson-title">
           01 <span>/</span> Inside a transformer
         </span>
-        <button
-          className="model-badge"
-          aria-expanded={about}
-          onClick={() => setAbout(!about)}
-        >
-          <i />
-          Tiny model · 1 block
-          <Info size={14} />
-        </button>
+        <div className="header-tools">
+          <button className="orientation-reopen" onClick={() => moveTour(0)}>
+            Quick orientation
+          </button>
+          <button
+            className="model-badge"
+            aria-expanded={about}
+            onClick={() => setAbout(!about)}
+          >
+            <i />
+            Tiny model · 1 block
+            <Info size={14} />
+          </button>
+        </div>
       </header>
       {about && (
         <section className="about-panel">
@@ -281,7 +308,10 @@ export default function Home() {
             </p>
           </div>
         </aside>
-        <section className="lesson">
+        <section className={'lesson' + (tour !== null ? ' is-orienting' : '')}>
+          {tour !== null && (
+            <Orientation index={tour} onMove={moveTour} onFinish={finishTour} />
+          )}
           <div className="breadcrumb">
             Transformer walkthrough <span>/</span> {current.section}
           </div>
@@ -311,7 +341,7 @@ export default function Home() {
             {current.intro}
           </p>
           <div className="input-strip">
-            <span className="section-label">FOLLOW A TOKEN</span>
+            <span className="section-label">SELECT A TOKEN</span>
             <div className="tokens">
               {words.map((w, i) => (
                 <button
@@ -360,6 +390,24 @@ export default function Home() {
                   : current.matrixName}
               </span>
               <div className="canvas-options">
+                <div
+                  className="heatmap-mode"
+                  role="group"
+                  aria-label="Heatmap view"
+                >
+                  <button
+                    aria-pressed={!focusToken}
+                    onClick={() => setFocusToken(false)}
+                  >
+                    All tokens
+                  </button>
+                  <button
+                    aria-pressed={focusToken}
+                    onClick={() => setFocusToken(true)}
+                  >
+                    Focus token
+                  </button>
+                </div>
                 <label>
                   <input
                     type="checkbox"
@@ -448,13 +496,18 @@ export default function Home() {
                   words={words}
                   step={step}
                   token={token}
+                  focusToken={focusToken}
                   numbers={numbers}
                   projection={projection}
                   mlp={mlp}
                   phase={phase}
                   selection={selection}
                   onSelect={choose}
-                  equation={current.equation}
+                  equation={
+                    step === 2
+                      ? `${projection.toUpperCase()} = X · W${projection}`
+                      : current.equation
+                  }
                   caption={current.caption}
                 />
               </div>
@@ -464,35 +517,38 @@ export default function Home() {
               <TensorShape text={current.input} step={step} />
               <ArrowRight size={17} />
               <TensorShape text={shapeOut} step={step} output />
-              <small>{current.axes}</small>
+              <small>
+                Axes are labelled below each size · read left to right
+              </small>
             </div>
           </div>
-          <div className="legend">
-            {step >= 3 && step <= 8 ? (
-              <>
-                <span>
-                  <i style={{ background: '#70d2c4' }} />
-                  Head 1
-                </span>
-                <span>
-                  <i style={{ background: '#e5ba7c' }} />
-                  Head 2
-                </span>
-                <span>
-                  <i style={{ background: '#b8a4e7' }} />
-                  Head 3
-                </span>
-              </>
-            ) : (
-              <span>
-                <i style={{ background: '#70d2c4' }} />
-                Highlighted row · selected token
-              </span>
-            )}
-            <span className="legend-end">
-              Batch size 1 · rows follow tokens
+          <div className="heatmap-legend" aria-label="Heatmap colour scale">
+            <span>
+              {step === 6 || step === 11 ? '0' : `−${scale.toFixed(2)}`}
+            </span>
+            <span
+              className={
+                'colour-ramp ' + (step === 6 || step === 11 ? 'positive' : '')
+              }
+              aria-hidden="true"
+            />
+            <span>+{scale.toFixed(2)}</span>
+            <span>
+              {step === 6 || step === 11
+                ? 'Zero → larger probability'
+                : 'Negative → zero → positive'}
+            </span>
+            <span className="scale-note">
+              {focusToken
+                ? 'Other rows are dimmed. Switch to All tokens to compare.'
+                : 'One scale for all rows and heads. Selection only adds an outline.'}
             </span>
           </div>
+          <OperationGuide
+            step={step}
+            tokens={words.length}
+            projection={projection}
+          />
           <div className="under-canvas">
             <div>
               <span className="section-label">THE INTUITION</span>
@@ -502,14 +558,16 @@ export default function Home() {
             <div className="detail-stack">
               <details className="code-box">
                 <summary>
-                  <Code2 size={17} /> See the code <ChevronDown size={16} />
+                  <Code2 size={17} /> Pseudocode <ChevronDown size={16} />
                 </summary>
                 <pre>{current.code}</pre>
                 <p className="code-caption">
-                  PyTorch-style excerpt · weights omit biases
+                  Python-like pseudocode, not runnable PyTorch. Setup, imports
+                  and module definitions are omitted; this toy model’s
+                  projections have no biases.
                 </p>
               </details>
-              {step !== 11 && (
+              {(step !== 11 || !focusToken) && (
                 <details
                   className="code-box inspector"
                   open={selection !== null ? true : undefined}
@@ -609,6 +667,7 @@ export default function Home() {
                 aria-label={playing ? 'Pause walkthrough' : 'Play walkthrough'}
                 onClick={() => {
                   if (step === 11) navigate(0);
+                  setTour(null);
                   setPlaying(!playing);
                 }}
               >

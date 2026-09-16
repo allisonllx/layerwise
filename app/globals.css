@@ -997,3 +997,341 @@ h1 > span {
 .dim {
   cursor: help;
 }
+/* Labels remain visible; colour and hover are supplementary. */
+.shape-strip {
+  align-items: center;
+  gap: 16px;
+}
+.tensor-shape {
+  display: inline;
+  line-height: 2;
+  white-space: normal;
+}
+.dimension-with-label {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 4px;
+  line-height: 1.2;
+  cursor: default;
+}
+.dimension-with-label b {
+  font: inherit;
+  font-size: 16px;
+}
+.dimension-with-label small {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 10px;
+  max-width: 70px;
+  text-align: center;
+  color: #adbcc6;
+  line-height: 1.3;
+}
+.shape-strip > small {
+  flex-basis: 100%;
+  margin: 0;
+}
+.heatmap-mode {
+  display: flex;
+  border: 1px solid #3c5059;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+.heatmap-mode button {
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  color: #aabcc6;
+  white-space: nowrap;
+}
+.heatmap-mode button[aria-pressed='true'] {
+  background: #234b43;
+  color: #c0f7e9;
+}
+.heatmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 0;
+  font-size: 12px;
+  color: #adbdc7;
+}
+.colour-ramp {
+  width: 120px;
+  height: 8px;
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    rgb(231, 153, 131),
+    rgb(24, 36, 44) 50%,
+    rgb(112, 210, 196)
+  );
+  border: 1px solid #384d56;
+}
+.colour-ramp.positive {
+  background: linear-gradient(90deg, rgb(24, 36, 44), rgb(112, 210, 196));
+}
+.scale-note {
+  flex-basis: 100%;
+  color: #9fafb9;
+  font-size: 12px;
+}
+.column-label {
+  font-size: 10px;
+  fill: #b8c9d3;
+}
+.operation-guide {
+  margin: 4px 0 25px;
+}
+.dimension-example {
+  padding: 20px;
+  background: #111e25;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 13px;
+}
+.dimension-equation {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.dimension-equation > div {
+  flex: 1;
+  min-width: 135px;
+}
+.dimension-equation b {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #c0ded9;
+  margin-bottom: 10px;
+}
+.dimension-equation p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #b1c0cb;
+  margin: 0;
+}
+.dimension-equation strong {
+  color: var(--cyan);
+  font-size: 20px;
+  font-weight: 500;
+}
+.dimension-equation p > span {
+  color: #8699a8;
+  margin: 0 3px;
+}
+.math-operator {
+  font-size: 22px;
+  color: #8ea9b2;
+}
+.contraction-note {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #aebfc8;
+  margin: 18px 0 0;
+}
+.symbol-guide {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.symbol-guide summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 0;
+  font-size: 14px;
+  color: #c2d0d9;
+  cursor: pointer;
+}
+.symbol-guide dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 25px;
+  padding: 4px 0 18px;
+  margin: 0;
+}
+.symbol-guide dt {
+  font-size: 13px;
+  font-weight: 550;
+  color: #b5e4da;
+  margin-bottom: 5px;
+}
+.symbol-guide dd {
+  font-size: 14px;
+  color: #a9bac6;
+  line-height: 1.65;
+  margin: 0;
+}
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.orientation-reopen {
+  font-size: 13px;
+  color: #acd9d0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.orientation {
+  border: 1px solid #41685f;
+  border-radius: 12px;
+  padding: 22px;
+  background: #14251f;
+  margin-bottom: 28px;
+}
+.orientation-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.orientation-top button {
+  font-size: 12px;
+  color: #b8c9c1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.orientation h2 {
+  font:
+    27px Georgia,
+    serif;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+  margin: 15px 0 12px;
+}
+.orientation p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #c1cec8;
+  margin: 0;
+}
+.orientation p.orientation-hint {
+  font-size: 13px;
+  color: #92bdae;
+  margin: 12px 0 18px;
+}
+.orientation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.orientation-actions > span {
+  font-size: 11px;
+  color: #9eb7ac;
+}
+.orientation-actions .primary,
+.orientation-actions .secondary {
+  padding: 9px 12px;
+  min-height: 35px;
+  font-size: 12px;
+}
+.orientation .section-label {
+  font-size: 11px;
+  color: #99c7b9;
+}
+@media (max-width: 1100px) {
+  .topbar .lesson-title {
+    display: none;
+  }
+  .canvas-options {
+    flex-wrap: wrap;
+  }
+  .dimension-equation {
+    gap: 10px;
+  }
+  .symbol-guide dl {
+    gap: 15px;
+  }
+  .header-tools {
+    gap: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .model-badge {
+    display: none;
+  }
+  .orientation {
+    padding: 16px;
+  }
+  .orientation-actions > span {
+    display: none;
+  }
+  .orientation h2 {
+    font-size: 23px;
+  }
+  .symbol-guide dl {
+    grid-template-columns: 1fr;
+  }
+  .dimension-equation {
+    flex-direction: column;
+    align-items: start;
+  }
+  .dimension-equation > div {
+    width: 100%;
+  }
+  .dimension-equation .math-operator {
+    align-self: center;
+  }
+  .shape-strip > svg {
+    display: none;
+  }
+  .tensor-shape {
+    width: 100%;
+  }
+  .canvas-options {
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+  .heatmap-mode button {
+    padding: 7px 10px;
+  }
+  .orientation-top {
+    align-items: start;
+  }
+  .orientation-top .section-label {
+    line-height: 1.7;
+  }
+  .header-tools {
+    gap: 0;
+  }
+  .column-label {
+    font-size: 11px;
+  }
+}
+.is-orienting .intro {
+  display: none;
+}
+.is-orienting .lesson-heading {
+  margin-bottom: 20px;
+}
+.is-orienting h1 {
+  font-size: 28px;
+}
+.is-orienting .breadcrumb {
+  margin-bottom: 12px;
+}
+.is-orienting .eyebrow {
+  font-size: 10px;
+  margin-bottom: 7px;
+}
+.is-orienting .orientation {
+  margin-bottom: 18px;
+}
+.dimension-with-label small {
+  font-size: 12px;
+  max-width: 88px;
+}
+.dimension-with-label {
+  padding: 7px 5px;
+}
+.dimension-with-label b {
+  font-size: 17px;
+}

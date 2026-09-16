@@ -1,5 +1,6 @@
 'use client';
 import { type Model, type Matrix, vocabulary } from '../lib/transformer';
+import { heatmapCell, heatmapScale } from '../lib/heatmap';
 export type Selection = { row: number; col: number; head: number };
 export type Projection = 'q' | 'k' | 'v';
 export type MlpStage = 'n2' | 'up' | 'activated' | 'down';
@@ -32,6 +33,7 @@ export default function TensorCanvas({
   words,
   step,
   token,
+  focusToken,
   numbers,
   projection,
   mlp,
@@ -45,6 +47,7 @@ export default function TensorCanvas({
   words: string[];
   step: number;
   token: number;
+  focusToken: boolean;
   numbers: boolean;
   projection: Projection;
   mlp: MlpStage;
@@ -58,6 +61,8 @@ export default function TensorCanvas({
     T = words.length;
   const isHeads = step >= 4 && step <= 7,
     score = step === 5 || step === 6;
+  const probabilities = step === 6 || step === 11;
+  const scale = heatmapScale(panels, probabilities);
   const rowHeight = 28,
     top = 66,
     cols = panels[0][0].length;
@@ -82,7 +87,7 @@ export default function TensorCanvas({
     const gap = step === 3 ? Math.floor(col / 4) * 24 * phase : 0;
     return [94 + col * cellW + gap, startY + row * rowHeight];
   }
-  if (step === 11) {
+  if (step === 11 && focusToken) {
     const sorted = model.probabilities[token]
         .map((p, i) => ({ p, word: vocabulary[i], index: i }))
         .sort((a, b) => b.p - a.p)
@@ -155,7 +160,9 @@ export default function TensorCanvas({
               className="diagram-label"
               style={{ fontSize: 11 }}
             >
-              {score ? 'query ↓ · key →' : 'tokens ↓ · features →'}
+              {score
+                ? 'query tokens ↓ · key tokens →'
+                : 'tokens ↓ · features →'}
             </text>
           </g>
         ))
@@ -165,7 +172,7 @@ export default function TensorCanvas({
             {T} tokens ↓
           </text>
           <text x="240" y="35" className="diagram-label">
-            {cols} features →
+            {cols} {step === 11 ? 'vocabulary entries' : 'features'} →
           </text>
         </>
       )}
@@ -193,17 +200,18 @@ export default function TensorCanvas({
                 : step === 3
                   ? colors[Math.min(2, Math.floor(c / (cols / 3)))]
                   : colors[0];
-              const opacity = masked
-                ? 0.035
-                : r === token
-                  ? 0.45 + Math.min(Math.abs(value), 2) * 0.24
-                  : 0.12 + Math.min(Math.abs(value), 2) * 0.12;
+              const cell = heatmapCell(
+                value,
+                scale,
+                probabilities,
+                focusToken && r !== token,
+              );
               return (
                 <g
                   key={c}
                   role="button"
                   tabIndex={-1}
-                  aria-label={`Token ${r}, ${score ? 'key' : 'feature'} ${c}, head ${h + 1}: ${value.toFixed(4)}`}
+                  aria-label={`Token ${r} (${words[r]}), ${score ? `key token ${c} (${words[c]})` : step === 11 ? `vocabulary ${vocabulary[c]}` : `feature ${c}`}, head ${h + 1}: ${value.toFixed(4)}`}
                   onClick={() => onSelect({ row: r, col: c, head: h })}
                   style={{
                     transform: `translate(${x}px,${y}px)`,
@@ -211,13 +219,13 @@ export default function TensorCanvas({
                     cursor: 'pointer',
                   }}
                 >
-                  <title>{`${masked ? 'Masked future token' : `[${r}, ${c}] = ${value.toFixed(5)}`} · click to inspect`}</title>
+                  <title>{`${words[r]} → ${score ? words[c] : step === 11 ? vocabulary[c] : `feature ${c}`}: ${masked ? 'masked future token · 0' : value.toFixed(5)} · click to inspect`}</title>
                   <rect
                     width={cellW - 4}
                     height="22"
                     rx="3"
-                    fill={hue}
-                    fillOpacity={opacity}
+                    fill={cell.color}
+                    fillOpacity={cell.opacity}
                     stroke={chosen ? '#fff' : r === token ? hue : 'transparent'}
                     strokeWidth={chosen ? 1.5 : 0.5}
                   />
@@ -228,7 +236,7 @@ export default function TensorCanvas({
                       y="14"
                       textAnchor="middle"
                       fontSize={cellW > 26 ? 9 : 8}
-                      fill={r === token ? '#071115' : '#b6c4ce'}
+                      fill={cell.lightText ? '#d4e3eb' : '#071115'}
                     >
                       {masked ? '×' : value.toFixed(1)}
                     </text>
@@ -246,6 +254,32 @@ export default function TensorCanvas({
           </g>
         )),
       )}
+      {score &&
+        panels.map((_, h) =>
+          words.map((word, c) => (
+            <text
+              key={`${h}-${c}`}
+              x={99 + h * 245 + c * cellW + 4}
+              y={startY + T * rowHeight + 10}
+              transform={`rotate(45 ${99 + h * 245 + c * cellW + 4} ${startY + T * rowHeight + 10})`}
+              className="column-label"
+            >
+              {word}
+            </text>
+          )),
+        )}
+      {step === 11 &&
+        vocabulary.map((word, c) => (
+          <text
+            key={word}
+            x={98 + c * cellW}
+            y={startY + T * rowHeight + 10}
+            transform={`rotate(45 ${98 + c * cellW} ${startY + T * rowHeight + 10})`}
+            className="column-label"
+          >
+            {word}
+          </text>
+        ))}
       {step === 3 &&
         [0, 1, 2].map((h) => (
           <text
@@ -353,10 +387,12 @@ export function inspect(
     explanation = `Σ over 12 joined features: context[${r}, j] × W_o[j, ${c}]`;
   else if (step === 9)
     explanation = `original input ${f(model.x[r][c])} + attention output ${f(model.projected[r][c])}`;
+  else if (step === 11)
+    explanation = `Probability of vocabulary entry “${vocabulary[c]}” after token ${r}. Softmax converts the vocabulary scores into a row that sums to 1.`;
   else if (step === 10)
     explanation =
       mlp === 'activated'
-        ? `GELU(${f(model.up[r][c])}) = 0.5x × (1 + tanh(√(2/π) × (x + 0.044715x³)))`
+        ? `Apply the smooth GELU activation to input ${f(model.up[r][c])}. GELU suppresses negative inputs and largely preserves large positive inputs.`
         : mlp === 'up'
           ? `Σ over 12 features: norm2[${r}, j] × W_up[j, ${c}]`
           : mlp === 'down'
@@ -365,6 +401,6 @@ export function inspect(
   return {
     value: f(value),
     explanation,
-    coords: `${panels.length > 1 ? `head ${h + 1} · ` : ''}token ${r} · ${step === 5 || step === 6 ? 'key' : 'feature'} ${c}`,
+    coords: `${panels.length > 1 ? `head ${h + 1} · ` : ''}token ${r} · ${step === 5 || step === 6 ? 'key token' : step === 11 ? 'vocabulary entry' : 'feature'} ${c}`,
   };
 }
