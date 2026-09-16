@@ -1335,3 +1335,84 @@ h1 > span {
 .dimension-with-label b {
   font-size: 17px;
 }
+/* Compact symbolic shapes, with one nearby key instead of repeated labels. */
+.compact-shapes {
+  display: block;
+  padding: 18px 22px;
+}
+.compact-shapes > span {
+  display: block;
+  margin-bottom: 12px;
+}
+.shape-equations {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shape-equations > div {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+.shape-role {
+  flex: 0 0 46px;
+  font:
+    12px var(--font-geist-sans),
+    sans-serif;
+  color: #aabcc6;
+}
+.compact-shapes .tensor-shape {
+  font-size: 14px;
+  line-height: 1.7;
+  width: auto;
+  overflow-wrap: normal;
+  white-space: normal;
+}
+.shape-tuple {
+  white-space: nowrap;
+}
+.compact-shapes .dim {
+  cursor: help;
+}
+.shape-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin: 14px 0 0;
+}
+.shape-key > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.shape-key dt {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.shape-key dd {
+  margin: 0;
+  color: #aebdc6;
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  .compact-shapes {
+    padding: 16px;
+  }
+  .shape-equations > div {
+    gap: 8px;
+  }
+  .shape-role {
+    flex-basis: 42px;
+  }
+  .compact-shapes .tensor-shape {
+    font-size: 13px;
+  }
+  .shape-key {
+    gap: 8px 18px;
+  }
+}

@@ -245,14 +245,14 @@ export function getSteps(t: number): Step[] {
       short: 'Attention scores',
       section: 'Multi-head attention',
       intro:
-        'Within each head, compare each query with every key using a dot product. Divide by √4 to scale the scores.',
+        'Within each head, compare each query with every key using a dot product. Each query and key has 4 features per head (12 total features ÷ 3 heads). Scale each score by dividing by √4 = 2.',
       intuition: 'The feature axis becomes a token axis.',
       detail:
         'A tokens × 4 query matrix multiplies a 4 × tokens key matrix. The four features are summed away, leaving a tokens × tokens score matrix. Click a cell to inspect one dot product.',
       input: `Q ${heads} × Kᵀ [1, 3, 4, ${t}]`,
       output: `[1, 3, ${t}, ${t}]`,
       axes: 'batch · heads · query tokens · key tokens',
-      code: 'scores = q @ k.transpose(-2, -1)\nscores = scores / math.sqrt(4)',
+      code: 'scores = q @ k.transpose(-2, -1)\nfeatures_per_head = 4  # 12 features / 3 heads\nscores = scores / math.sqrt(features_per_head)',
       equation: 'queries · transposed keys',
       caption: '→ query-token × key-token scores',
       matrixName: 'Scaled attention scores',

@@ -64,7 +64,7 @@ export default function TensorCanvas({
   const probabilities = step === 6 || step === 11;
   const scale = heatmapScale(panels, probabilities);
   const rowHeight = 28,
-    top = 66,
+    top = 82,
     cols = panels[0][0].length;
   const cellW = isHeads
     ? score
@@ -160,19 +160,25 @@ export default function TensorCanvas({
               className="diagram-label"
               style={{ fontSize: 11 }}
             >
-              {score
-                ? 'query tokens ↓ · key tokens →'
-                : 'tokens ↓ · features →'}
+              {score ? 'Rows: query tokens' : 'Rows: tokens'}
+            </text>
+            <text
+              x={99 + h * 245}
+              y="69"
+              className="diagram-label"
+              style={{ fontSize: 11 }}
+            >
+              {score ? 'Columns: key tokens' : 'Columns: features'}
             </text>
           </g>
         ))
       ) : (
         <>
           <text x="94" y="35" className="diagram-label">
-            {T} tokens ↓
+            Rows: {T} tokens
           </text>
           <text x="240" y="35" className="diagram-label">
-            {cols} {step === 11 ? 'vocabulary entries' : 'features'} →
+            Columns: {cols} {step === 11 ? 'vocabulary entries' : 'features'}
           </text>
         </>
       )}
@@ -373,7 +379,8 @@ export function inspect(
     explanation =
       model.qh[h][r]
         .map((v, j) => `${f(v)} × ${f(model.kh[h][c][j])}`)
-        .join(' + ') + '; divide the sum by √4 = 2';
+        .join(' + ') +
+      '; divide the sum by √4 = 2 (4 query/key features per head)';
   else if (step === 6)
     explanation =
       c > r

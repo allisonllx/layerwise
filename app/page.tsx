@@ -22,7 +22,7 @@ import TensorCanvas, {
   type MlpStage,
 } from '../components/tensor-canvas';
 import { examples, runModel, getSteps } from '../lib/transformer';
-import TensorShape from '../components/tensor-shape';
+import TensorShape, { ShapeLegend } from '../components/tensor-shape';
 import OperationGuide from '../components/operation-guide';
 import Orientation, { tourSteps } from '../components/orientation';
 import { getDisplay } from '../components/tensor-canvas';
@@ -512,14 +512,23 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="shape-strip">
-              <span>SHAPE</span>
-              <TensorShape text={current.input} step={step} />
-              <ArrowRight size={17} />
-              <TensorShape text={shapeOut} step={step} output />
-              <small>
-                Axes are labelled below each size · read left to right
-              </small>
+            <div className="shape-strip compact-shapes">
+              <span>SHAPES</span>
+              <div className="shape-equations">
+                <div>
+                  <span className="shape-role">Input</span>
+                  <TensorShape text={current.input} step={step} />
+                </div>
+                <div>
+                  <span className="shape-role">Output</span>
+                  <TensorShape text={shapeOut} step={step} output />
+                </div>
+              </div>
+              <ShapeLegend
+                input={current.input}
+                output={shapeOut}
+                step={step}
+              />
             </div>
           </div>
           <div className="heatmap-legend" aria-label="Heatmap colour scale">

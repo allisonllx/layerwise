@@ -49,8 +49,12 @@ const terms: Record<number, [string, string][]> = {
     ],
     ['Scores', 'One comparison score for each query-token / key-token pair.'],
     [
+      'F = 4 · features per head',
+      'Each query and key vector has 4 features in this head: 12 total features divided among 3 heads. The scaling factor is √F = √4 = 2.',
+    ],
+    [
       '· / @',
-      'Matrix multiplication: multiply matching features and add them. Divide by √4 = 2 to scale the scores.',
+      'Matrix multiplication: multiply matching features and add them. Divide by √F = 2, where F = 4 query/key features per head.',
     ],
   ],
   6: [
