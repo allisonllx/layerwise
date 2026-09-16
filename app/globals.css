@@ -1416,3 +1416,30 @@ h1 > span {
     gap: 8px 18px;
   }
 }
+.shape-pair {
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  vertical-align: middle;
+  margin: 3px 0 5px;
+  white-space: nowrap;
+}
+.shape-pair .dim {
+  display: inline-block;
+  min-width: 2ch;
+  text-align: center;
+}
+.numeric-shape {
+  font-weight: 600;
+}
+.symbolic-shape {
+  opacity: 0.65;
+}
+.shape-pair .shape-tuple {
+  line-height: 1.65;
+}
+.shape-equations > div {
+  align-items: center;
+}
+.compact-shapes .tensor-shape {
+  line-height: 2.8;
+}

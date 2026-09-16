@@ -21,3 +21,7 @@ Verified via server-rendered component checks for every step and example length:
 ## Browser comment follow-up — 2026-09-16
 
 Define 4 as query/key features per head beside the attention scaling factor. Replace grid direction arrows with explicit Rows / Columns labels. Render compact symbolic input/output shapes and a shared visible key with current sizes; distinguish Tq query positions from Tk key positions even when their counts match. Checks cover all steps and all sentence lengths, including Q/K-transpose axis order and F = 4. Compiler and production build passed.
+
+## Numeric shape follow-up
+
+Each tensor now shows its concrete numeric array directly above the corresponding symbolic array. The nearby legend only explains symbol meanings, without repeating sizes. Compiler and production build passed.

@@ -74,21 +74,33 @@ export default function TensorShape({
         part.axes.length === 0 ? (
           part.text
         ) : (
-          <span className="shape-tuple" key={index}>
-            [
-            {part.axes.map((axis, i) => (
-              <span key={i}>
-                {i > 0 ? ', ' : ''}
-                <span
-                  className={'dim ' + tone(axis.name)}
-                  title={`${axis.symbol} = ${axis.value} ${axis.name}`}
-                  aria-label={`${axis.symbol}: ${axis.value} ${axis.name}`}
-                >
-                  {axis.symbol}
-                </span>
+          <span className="shape-pair" key={index}>
+            {(['value', 'symbol'] as const).map((kind) => (
+              <span
+                className={
+                  'shape-tuple ' +
+                  (kind === 'value' ? 'numeric-shape' : 'symbolic-shape')
+                }
+                key={kind}
+                aria-label={
+                  kind === 'value' ? 'Current dimensions' : 'Axis symbols'
+                }
+              >
+                [
+                {part.axes.map((axis, i) => (
+                  <span key={i}>
+                    {i > 0 ? ', ' : ''}
+                    <span
+                      className={'dim ' + tone(axis.name)}
+                      title={`${axis.symbol}: ${axis.value} ${axis.name}`}
+                    >
+                      {axis[kind]}
+                    </span>
+                  </span>
+                ))}
+                ]
               </span>
             ))}
-            ]
           </span>
         ),
       )}
@@ -111,13 +123,13 @@ export function ShapeLegend({
   ].flatMap((part) => part.axes);
   const unique = [...new Map(axes.map((axis) => [axis.symbol, axis])).values()];
   return (
-    <dl className="shape-key" aria-label="Shape symbols and current sizes">
+    <dl className="shape-key" aria-label="What the shape symbols mean">
       {unique.map((axis) => (
         <div key={axis.symbol}>
-          <dt className={tone(axis.name)}>
-            {axis.symbol} = {axis.value}
-          </dt>
-          <dd>{axis.name === 'batch' ? 'sequence in the batch' : axis.name}</dd>
+          <dt className={tone(axis.name)}>{axis.symbol}</dt>
+          <dd>
+            {axis.name === 'batch' ? 'sequences in the batch' : axis.name}
+          </dd>
         </div>
       ))}
     </dl>
