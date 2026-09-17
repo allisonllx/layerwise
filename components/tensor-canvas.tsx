@@ -160,7 +160,7 @@ export default function TensorCanvas({
               className="diagram-label"
               style={{ fontSize: 11 }}
             >
-              {score ? 'Rows: query tokens' : 'Rows: tokens'}
+              {score ? 'Rows ↓ query tokens' : 'Rows ↓ tokens'}
             </text>
             <text
               x={99 + h * 245}
@@ -168,17 +168,17 @@ export default function TensorCanvas({
               className="diagram-label"
               style={{ fontSize: 11 }}
             >
-              {score ? 'Columns: key tokens' : 'Columns: features'}
+              {score ? 'Columns → key tokens' : 'Columns → features'}
             </text>
           </g>
         ))
       ) : (
         <>
           <text x="94" y="35" className="diagram-label">
-            Rows: {T} tokens
+            Rows ↓ {T} tokens
           </text>
           <text x="240" y="35" className="diagram-label">
-            Columns: {cols} {step === 11 ? 'vocabulary entries' : 'features'}
+            Columns → {cols} {step === 11 ? 'vocabulary entries' : 'features'}
           </text>
         </>
       )}
