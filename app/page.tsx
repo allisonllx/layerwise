@@ -1,5 +1,12 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { flushSync } from 'react-dom';
 import {
   ArrowLeft,
@@ -28,6 +35,8 @@ import Transformation from '../components/transformation';
 import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
+  const lessonStart = useRef<HTMLDivElement>(null);
+  const [navigation, setNavigation] = useState(0);
   const [step, setStep] = useState(0),
     [token, setToken] = useState(2),
     [numbers, setNumbers] = useState(false),
@@ -37,7 +46,7 @@ export default function Home() {
     [projection, setProjection] = useState<Projection>('q'),
     [mlp, setMlp] = useState<MlpStage>('down'),
     [selection, setSelection] = useState<Selection | null>(null),
-    [phase, setPhase] = useState(0),
+    [phase, setPhase] = useState(1),
     [replay, setReplay] = useState(0),
     [zoom, setZoom] = useState(1),
     [about, setAbout] = useState(false);
@@ -49,13 +58,23 @@ export default function Home() {
     setStep(Math.max(0, Math.min(11, n)));
     setTour(null);
     setSelection(null);
-    setPhase(0);
+    setPhase(1);
+    setNavigation((n) => n + 1);
   }, []);
+  useLayoutEffect(() => {
+    if (!navigation) return;
+    lessonStart.current?.focus({ preventScroll: true });
+    lessonStart.current?.scrollIntoView({
+      block: 'start',
+      behavior: 'instant',
+    });
+  }, [navigation]);
   useEffect(() => {
+    if (!replay) return;
     setPhase(0);
     const timer = setTimeout(() => setPhase(1), 70);
     return () => clearTimeout(timer);
-  }, [step, replay, example]);
+  }, [replay]);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (
@@ -296,7 +315,7 @@ export default function Home() {
           <div className="breadcrumb">
             Transformer walkthrough <span>/</span> {current.section}
           </div>
-          <div className="lesson-heading">
+          <div className="lesson-heading" ref={lessonStart} tabIndex={-1}>
             <div>
               <div className="eyebrow">
                 STEP {String(step + 1).padStart(2, '0')} OF 12
@@ -482,6 +501,7 @@ export default function Home() {
             <div className="diagram-scroll">
               <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
                 <TensorCanvas
+                  key={`${step}-${example}`}
                   model={model}
                   words={words}
                   step={step}

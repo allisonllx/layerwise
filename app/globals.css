@@ -1497,3 +1497,10 @@ h1 > span {
   font-size: 13px;
   margin-bottom: 0;
 }
+
+.lesson-heading {
+  scroll-margin-top: 24px;
+}
+.lesson-heading:focus {
+  outline: none;
+}
