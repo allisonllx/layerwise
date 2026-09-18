@@ -1443,3 +1443,57 @@ h1 > span {
 .compact-shapes .tensor-shape {
   line-height: 2.8;
 }
+
+.transformation {
+  border-block: 1px solid #293d46;
+  padding: 22px 20px 14px;
+  background: #0b161c;
+}
+.transformation-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #70d2c4;
+}
+.transformation p {
+  color: #aabcc5;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 72ch;
+}
+.transformation-controls,
+.transformation-selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.transformation-controls label {
+  flex: 1;
+  min-width: 110px;
+}
+.transformation-controls input {
+  width: 100%;
+  accent-color: #70d2c4;
+}
+.transformation-controls output {
+  color: #aabcc5;
+  min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+}
+.transformation-selectors {
+  color: #aabcc5;
+  font-size: 14px;
+  margin: 16px 0;
+}
+.transformation-selectors select {
+  background: #14232b;
+  color: #dce5e8;
+  border: 1px solid #344b55;
+  border-radius: 6px;
+  padding: 6px;
+}
+.transformation .transformation-note {
+  font-size: 13px;
+  margin-bottom: 0;
+}

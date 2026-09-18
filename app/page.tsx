@@ -8,8 +8,6 @@ import {
   Layers3,
   RotateCcw,
   Code2,
-  Play,
-  Pause,
   Info,
   Plus,
   Minus,
@@ -26,6 +24,7 @@ import TensorShape, { ShapeLegend } from '../components/tensor-shape';
 import OperationGuide from '../components/operation-guide';
 import Orientation, { tourSteps } from '../components/orientation';
 import { getDisplay } from '../components/tensor-canvas';
+import Transformation from '../components/transformation';
 import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
@@ -40,7 +39,6 @@ export default function Home() {
     [selection, setSelection] = useState<Selection | null>(null),
     [phase, setPhase] = useState(0),
     [replay, setReplay] = useState(0),
-    [playing, setPlaying] = useState(false),
     [zoom, setZoom] = useState(1),
     [about, setAbout] = useState(false);
   const words = examples[example],
@@ -58,20 +56,6 @@ export default function Home() {
     const timer = setTimeout(() => setPhase(1), 70);
     return () => clearTimeout(timer);
   }, [step, replay, example]);
-  useEffect(() => {
-    if (!playing) return;
-    const timer = setInterval(() => {
-      setStep((s) => {
-        if (s >= 11) {
-          setPlaying(false);
-          return s;
-        }
-        return s + 1;
-      });
-      setSelection(null);
-    }, 6500);
-    return () => clearInterval(timer);
-  }, [playing]);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (
@@ -149,7 +133,6 @@ export default function Home() {
               )
                 throw new Error('Token position is outside the sentence');
               flushSync(() => {
-                setPlaying(false);
                 navigate(Number(v.step) - 1);
                 if (v.token !== undefined) setToken(Number(v.token));
               });
@@ -167,14 +150,13 @@ export default function Home() {
     return () => lifecycle.abort();
   }, [navigate, steps, words.length]);
   const moveTour = (index: number) => {
-    setPlaying(false);
     setFocusToken(false);
     navigate(tourSteps[index]);
     setTour(index);
   };
   const finishTour = () => {
     navigate(0);
-    setPlaying(false);
+
     setTour(null);
   };
   const scale = heatmapScale(
@@ -197,7 +179,6 @@ export default function Home() {
       aria-current={step === i ? 'step' : undefined}
       className={'map-step ' + (step === i ? 'active' : '')}
       onClick={() => {
-        setPlaying(false);
         navigate(i);
       }}
     >
@@ -331,7 +312,6 @@ export default function Home() {
               title="Start from the beginning"
               onClick={() => {
                 navigate(0);
-                setPlaying(false);
               }}
             >
               <RotateCcw size={18} />
@@ -488,6 +468,16 @@ export default function Home() {
                       </button>
                     ))}
               </div>
+            )}
+            {step >= 3 && step <= 5 && (
+              <Transformation
+                key={`${step}-${example}-${projection}-${token}`}
+                model={model}
+                words={words}
+                step={step}
+                token={token}
+                projection={projection}
+              />
             )}
             <div className="diagram-scroll">
               <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
@@ -664,24 +654,12 @@ export default function Home() {
               className="secondary"
               disabled={step === 0}
               onClick={() => {
-                setPlaying(false);
                 navigate(step - 1);
               }}
             >
               <ArrowLeft size={17} /> Back
             </button>
             <div className="playback">
-              <button
-                className="play-button"
-                aria-label={playing ? 'Pause walkthrough' : 'Play walkthrough'}
-                onClick={() => {
-                  if (step === 11) navigate(0);
-                  setTour(null);
-                  setPlaying(!playing);
-                }}
-              >
-                {playing ? <Pause size={16} /> : <Play size={16} />}
-              </button>
               <div className="progress-dots">
                 {steps.map((s, i) => (
                   <button
@@ -691,7 +669,6 @@ export default function Home() {
                     aria-current={i === step ? 'step' : undefined}
                     className={i === step ? 'active' : ''}
                     onClick={() => {
-                      setPlaying(false);
                       navigate(i);
                     }}
                   />
@@ -702,7 +679,6 @@ export default function Home() {
             <button
               className="primary"
               onClick={() => {
-                setPlaying(false);
                 navigate(step === 11 ? 0 : step + 1);
               }}
             >

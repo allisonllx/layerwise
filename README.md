@@ -11,7 +11,7 @@ It grew out of a practical learning problem: architecture diagrams show the bloc
 ## Explore the transformer
 
 - **An expandable architecture map:** jump between embeddings, attention, residual connections, the feed-forward network, and output.
-- **Twelve connected steps:** move forward and backward, replay transformations, or use automatic playback.
+- **Twelve connected steps:** move forward and backward at your own pace. Split heads, permute, and attention scores include an explicit transformation player with pause, replay, and a scrubber; playback never advances the lesson.
 - **Numeric and symbolic shapes:** see `[1, 3, 6, 4]` alongside `[B, H, Tq, F]`, with a nearby key explaining each axis.
 - **Token tracking:** select a word or matrix cell to inspect its values and calculations.
 - **Comparable heatmaps:** All tokens preserves a shared colour scale across rows and heads. Focus token explicitly dims other rows.
