@@ -704,7 +704,7 @@ h1 > span {
 .tensor-tabs {
   display: flex;
   gap: 6px;
-  margin: 0 22px 4px;
+  margin: 0 22px 18px;
   flex-wrap: wrap;
 }
 .tensor-tabs button {
