@@ -11,12 +11,13 @@ It grew out of a practical learning problem: architecture diagrams show the bloc
 ## Explore the transformer
 
 - **An expandable architecture map:** jump between embeddings, attention, residual connections, the feed-forward network, and output.
-- **Twelve connected steps:** move forward and backward at your own pace. Split heads, permute, and attention scores include an explicit transformation player with pause, replay, and a scrubber; playback never advances the lesson.
+- **Twelve connected steps:** move forward and backward at your own pace. Every step includes an explicit transformation player with pause, replay, and a scrubber; playback never advances the lesson. Multi-operation steps include selectable stages, with the output of one becoming the next input.
 - **Numeric and symbolic shapes:** see `[1, 3, 6, 4]` alongside `[B, H, Tq, F]`, with a nearby key explaining each axis.
 - **Token tracking:** select a word or matrix cell to inspect its values and calculations.
 - **Comparable heatmaps:** All tokens preserves a shared colour scale across rows and heads. Focus token explicitly dims other rows.
 - **Attention internals:** explore queries, keys, values, head splitting, axis permutation, scores, causal masking, and weighted value mixtures.
 - **Feed-forward stages:** inspect normalisation, expansion from 12 to 48 features, GELU activation, and compression back to 12.
+- **Guided calculations:** follow one token through additions, normalisation, projections, masking, softmax, GELU, and head joining, then explore the complete result. Expand the arithmetic to inspect individual output features.
 - **Contextual explanations:** named rows and columns, symbol definitions, worked dimension examples, and clearly labelled pseudocode.
 - **A quick orientation:** a skippable guide introduces the architecture, grids, dimensions, and heatmap controls.
 
@@ -93,3 +94,7 @@ lib/
 This is an exploratory learning prototype focused on one small transformer. It does not yet import model files or papers, simulate training, or provide CNN, VAE, image, or video lessons. The current visualisations use interactive 2D grids and animations.
 
 Future directions include additional architectures, richer input examples, and connecting a paper’s architecture to its implementation. Feedback on what remains confusing is especially useful for shaping those lessons.
+
+### Validate guided calculations
+
+Run `node scripts/check-transitions.cjs` to check every new transition against the model across all examples, tokens, heads, projection choices and MLP stages.

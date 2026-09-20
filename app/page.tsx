@@ -33,6 +33,7 @@ import Orientation, { tourSteps } from '../components/orientation';
 import { getDisplay } from '../components/tensor-canvas';
 import Transformation from '../components/transformation';
 import ValueMixing from '../components/value-mixing';
+import OperationTransition from '../components/operation-transition';
 import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
@@ -193,6 +194,32 @@ export default function Home() {
     setSelection(s);
     setToken(s.row);
   };
+  const resultCanvas = (
+    <div className="diagram-scroll">
+      <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
+        <TensorCanvas
+          key={`${step}-${example}`}
+          model={model}
+          words={words}
+          step={step}
+          token={token}
+          focusToken={focusToken}
+          numbers={numbers}
+          projection={projection}
+          mlp={mlp}
+          phase={phase}
+          selection={selection}
+          onSelect={choose}
+          equation={
+            step === 2
+              ? `${projection.toUpperCase()} = X · W${projection}`
+              : current.equation
+          }
+          caption={current.caption}
+        />
+      </div>
+    </div>
+  );
   const mapItem = (i: number, label = steps[i].short) => (
     <button
       key={i}
@@ -506,52 +533,25 @@ export default function Home() {
                 words={words}
                 token={token}
               >
-                <div className="diagram-scroll">
-                  <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
-                    <TensorCanvas
-                      key={`${step}-${example}`}
-                      model={model}
-                      words={words}
-                      step={step}
-                      token={token}
-                      focusToken={focusToken}
-                      numbers={numbers}
-                      projection={projection}
-                      mlp={mlp}
-                      phase={phase}
-                      selection={selection}
-                      onSelect={choose}
-                      equation={current.equation}
-                      caption={current.caption}
-                    />
-                  </div>
-                </div>
+                {resultCanvas}
               </ValueMixing>
+            ) : [0, 1, 2, 6, 8, 9, 10, 11].includes(step) ? (
+              <OperationTransition
+                key={`${step}-${example}-${projection}-${mlp}`}
+                model={model}
+                words={words}
+                step={step}
+                token={token}
+                projection={projection}
+                mlp={mlp}
+                zoom={zoom}
+                finalScale={scale}
+                focusToken={focusToken}
+              >
+                {resultCanvas}
+              </OperationTransition>
             ) : (
-              <div className="diagram-scroll">
-                <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
-                  <TensorCanvas
-                    key={`${step}-${example}`}
-                    model={model}
-                    words={words}
-                    step={step}
-                    token={token}
-                    focusToken={focusToken}
-                    numbers={numbers}
-                    projection={projection}
-                    mlp={mlp}
-                    phase={phase}
-                    selection={selection}
-                    onSelect={choose}
-                    equation={
-                      step === 2
-                        ? `${projection.toUpperCase()} = X · W${projection}`
-                        : current.equation
-                    }
-                    caption={current.caption}
-                  />
-                </div>
-              </div>
+              resultCanvas
             )}
             <div className="shape-strip compact-shapes">
               <span>SHAPES</span>

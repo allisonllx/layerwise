@@ -1541,3 +1541,35 @@ h1 > span {
   grid-area: 1 / 1;
   min-width: 0;
 }
+
+.operation-transition {
+  padding: 22px 20px;
+  border-block: 1px solid #293d46;
+  background: #0b161c;
+}
+.operation-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.operation-stages button {
+  border: 1px solid #344b55;
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: transparent;
+  color: #aabcc5;
+  font-size: 13px;
+}
+.operation-stages button[aria-pressed='true'] {
+  border-color: #70d2c4;
+  color: #b5e5dc;
+  background: #17342f;
+}
+.operation-transition .mix-arithmetic input {
+  background: #14232b;
+  color: #dce5e8;
+  border: 1px solid #344b55;
+  border-radius: 5px;
+  width: 65px;
+  padding: 5px;
+}
