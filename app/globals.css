@@ -1597,3 +1597,66 @@ h1 > span {
 .orientation-anchor:focus {
   outline: none;
 }
+
+.tensor-flow-rows {
+  width: 100%;
+}
+.tensor-flow-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 14px 0;
+}
+.tensor-flow-row strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #dce5e8;
+  margin: 6px 0;
+}
+.tensor-flow-row small {
+  display: block;
+  color: #9bafb9;
+  font-size: 13px;
+}
+.tensor-source {
+  display: block;
+  color: #70d2c4;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tensor-flow-operation {
+  margin: 14px 0;
+  color: #b8d9d2;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.residual-explainer {
+  border: 1px solid #344b55;
+  border-radius: 10px;
+  padding: 18px;
+  margin: 18px 0;
+}
+.residual-explainer strong {
+  color: #dce5e8;
+  font-size: 16px;
+  font-weight: 500;
+}
+.residual-explainer p,
+.tensor-parameter-note {
+  color: #aabcc5;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.residual-explainer svg {
+  min-width: 640px;
+}
+@media (max-width: 600px) {
+  .tensor-flow-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

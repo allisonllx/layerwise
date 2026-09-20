@@ -27,7 +27,7 @@ import TensorCanvas, {
   type MlpStage,
 } from '../components/tensor-canvas';
 import { examples, runModel, getSteps } from '../lib/transformer';
-import TensorShape, { ShapeLegend } from '../components/tensor-shape';
+import TensorFlow from '../components/tensor-flow';
 import OperationGuide from '../components/operation-guide';
 import Orientation, { tourSteps } from '../components/orientation';
 import { getDisplay } from '../components/tensor-canvas';
@@ -189,10 +189,6 @@ export default function Home() {
   );
   const chosen = selection ?? { row: token, col: 0, head: 0 },
     calculation = inspect(model, step, projection, mlp, chosen);
-  const shapeOut =
-    step === 10
-      ? `[1, ${words.length}, ${mlp === 'up' || mlp === 'activated' ? 48 : 12}]`
-      : current.output;
   const selectToken = (next: number) => {
     setToken(next);
     setSelection(null);
@@ -573,24 +569,17 @@ export default function Home() {
             ) : (
               resultCanvas
             )}
-            <div className="shape-strip compact-shapes">
-              <span>SHAPES</span>
-              <div className="shape-equations">
-                <div>
-                  <span className="shape-role">Input</span>
-                  <TensorShape text={current.input} step={step} />
-                </div>
-                <div>
-                  <span className="shape-role">Output</span>
-                  <TensorShape text={shapeOut} step={step} output />
-                </div>
-              </div>
-              <ShapeLegend
-                input={current.input}
-                output={shapeOut}
-                step={step}
-              />
-            </div>
+            <TensorFlow
+              step={step}
+              tokens={words.length}
+              projection={projection}
+              mlp={mlp}
+              onNavigate={(source, sourceProjection, sourceMlp) => {
+                if (sourceProjection) setProjection(sourceProjection);
+                if (sourceMlp) setMlp(sourceMlp);
+                navigate(source);
+              }}
+            />
           </div>
           <div className="heatmap-legend" aria-label="Heatmap colour scale">
             <span>

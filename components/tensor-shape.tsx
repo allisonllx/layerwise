@@ -1,7 +1,13 @@
 type Axis = { symbol: string; name: string; value: string };
 
-export function shapeAxes(text: string, step: number, output = false) {
-  return text.split(/(\[[^\]]+\])/g).map((part, index) => {
+export function shapeAxes(
+  text: string,
+  step: number,
+  output = false,
+  tensorIndex = 0,
+) {
+  return text.split(/(\[[^\]]+\])/g).map((part, localIndex) => {
+    const index = localIndex + tensorIndex * 2;
     if (!part.startsWith('[')) return { text: part, axes: [] as Axis[] };
     const dims = part
       .slice(1, -1)
@@ -63,14 +69,16 @@ export default function TensorShape({
   text,
   step,
   output = false,
+  tensorIndex = 0,
 }: {
   text: string;
   step: number;
   output?: boolean;
+  tensorIndex?: number;
 }) {
   return (
     <code className="tensor-shape">
-      {shapeAxes(text, step, output).map((part, index) =>
+      {shapeAxes(text, step, output, tensorIndex).map((part, index) =>
         part.axes.length === 0 ? (
           part.text
         ) : (
