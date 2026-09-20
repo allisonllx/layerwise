@@ -1548,6 +1548,7 @@ h1 > span {
   background: #0b161c;
 }
 .operation-stages {
+  margin-top: 22px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;

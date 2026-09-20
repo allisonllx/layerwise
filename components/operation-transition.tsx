@@ -121,47 +121,50 @@ export default function OperationTransition({
   const paint = (v: number) =>
     Number.isFinite(v) ? heatmapCell(v, scale, false).color : '#14232b';
   const number = (v: number) => (Number.isFinite(v) ? v.toFixed(2) : '−∞');
-  const explanation: string[] = {
+  const fmt = (value: number) =>
+    Number.isFinite(value) ? value.toFixed(4) : '−∞';
+  const inputValue = op.input[focus];
+  const outputValue = op.output[focus];
+  const brief = {
+    add: 'Add the matching features in these two rows.',
+    norm: 'Centre and rescale this token’s features.',
+    project: 'Combine the input features using a column of weights.',
+    mask: `Keep tokens up to “${words[token]}”; hide any tokens after it.`,
+    exp: 'Convert each score into a non-negative value.',
+    divide: 'Turn each value into its share of the row total.',
+    gelu: 'Apply the same activation function to every feature.',
+    join: 'Join the three heads without changing their values.',
+  }[op.kind];
+  const formula = {
     norm: [
-      `The average of this token’s features is ${op.mean?.toFixed(4)}. Subtract it from each feature.`,
-      `Then divide by ${op.divisor?.toFixed(4)}, the row’s standard deviation with a small stabilising term.`,
-      'This changes the values, while keeping the same number of features.',
+      'output = (feature − row mean) ÷ row scale',
+      `(${fmt(inputValue)} − ${fmt(op.mean!)}) ÷ ${fmt(op.divisor!)} = ${fmt(outputValue)}`,
+      'Row scale = √(variance + 0.00001); variance measures the spread of this row.',
     ],
     exp: [
-      `First subtract the largest score in this row (${op.mean?.toFixed(4)}) from every score.`,
-      'Then raise e (about 2.718) to each result. Larger scores still give larger values.',
-      step === 6
-        ? 'A hidden score of negative infinity becomes 0 here.'
-        : 'These values will be divided by their total to become probabilities.',
+      'positive value = exp(score − row maximum)',
+      `exp(${fmt(inputValue)} − ${fmt(op.mean!)}) = exp(${fmt(inputValue - op.mean!)}) = ${fmt(outputValue)}`,
+      'exp(x) means e raised to x, where e ≈ 2.718. exp(−∞) = 0.',
     ],
     divide: [
-      `Add the values in the input row. Their total is ${op.divisor?.toFixed(4)}.`,
-      'Divide each value by that total to find its share of the whole.',
-      step === 6
-        ? 'The attention weights now add up to 1. Hidden tokens keep a weight of 0.'
-        : 'The probabilities now add up to 1, or 100%.',
+      'weight = value ÷ row total',
+      `${fmt(inputValue)} ÷ ${fmt(op.divisor!)} = ${fmt(outputValue)}`,
+      'Row total = sum of the input values. All output weights add up to 1.',
+    ],
+    mask: [
+      'masked score = original score if key position ≤ query position; otherwise −∞',
+      `Key “${words[focus]}” (${focus}) ${focus <= token ? '≤' : '>'} query “${words[token]}” (${token}): ${fmt(inputValue)} → ${fmt(outputValue)}`,
+      'Positions start at 0. −∞ means negative infinity; softmax gives that token weight 0.',
     ],
     gelu: [
-      'Apply the GELU activation function to each feature on its own.',
-      'It reduces the magnitude of negative values and largely preserves large positive values.',
-      'All 48 features remain; their values change.',
+      'output = GELU(feature)',
+      `GELU(${fmt(inputValue)}) = ${fmt(outputValue)}`,
+      'GELU is a smooth activation: it attenuates negative values.',
     ],
-    mask:
-      token < words.length - 1
-        ? [
-            `The query is “${words[token]}”, token ${token}. Token positions are counted from 0.`,
-            'Tokens after it get a score of −∞ (negative infinity), marking them as hidden.',
-            'Softmax will turn each hidden score into an attention weight of 0.',
-          ]
-        : [
-            `The query is “${words[token]}”, the last token in this sentence.`,
-            'There are no later tokens to hide, so all scores in this row stay unchanged.',
-            'Softmax will turn these scores into attention weights.',
-          ],
     join: [
-      'Take this token’s four features from each of the three heads.',
-      'Place the groups next to each other to make a row of twelve features.',
-      'Nothing is added or recalculated; the same values are simply regrouped.',
+      '4 features per head × 3 heads = 12 joined features',
+      `Head ${Math.floor(focus / 4) + 1}, feature ${focus % 4} → joined feature ${focus}: ${fmt(outputValue)}`,
+      'Only the grouping changes. Every value stays the same.',
     ],
     add: [],
     project: [],
@@ -266,7 +269,7 @@ export default function OperationTransition({
       <p className="mix-caption">
         {progress >= 0.84
           ? 'The same operation applies to every token row. Explore the complete result below.'
-          : op.caption}
+          : brief}
       </p>
       <div
         className="operation-stages"
@@ -328,7 +331,7 @@ export default function OperationTransition({
       <p className="result-shortcut-note">
         {progress === 1
           ? 'You’re viewing this step’s final result. Back to animation returns to the start, paused.'
-          : 'Skip to result skips this animation and opens the current step’s finished heatmap. It does not advance the lesson.'}
+          : 'Skip to result opens this step’s finished heatmap.'}
       </p>
       <div className="mix-stage">
         <div
@@ -411,13 +414,21 @@ export default function OperationTransition({
                     ))}
                   </>
                 )}
-                {explanation.map((line, i) => (
+                {formula.map((line, i) => (
                   <text
                     key={i}
-                    x="100"
-                    y={153 + i * 23}
-                    fill="#dce5e8"
-                    fontSize="13"
+                    x="80"
+                    y={148 + i * 26}
+                    fill={i === 1 ? '#70d2c4' : i === 2 ? '#aabcc5' : '#dce5e8'}
+                    fontSize={
+                      i === 0
+                        ? op.kind === 'mask'
+                          ? 14
+                          : 18
+                        : i === 1
+                          ? 16
+                          : 12
+                    }
                   >
                     {line}
                   </text>
@@ -481,7 +492,8 @@ export default function OperationTransition({
         <output>{Math.round(progress * 100)}%</output>
       </div>
       <details className="mix-arithmetic">
-        <summary>Inspect this operation’s arithmetic</summary>
+        <summary>Explanation and arithmetic</summary>
+        <p>{op.caption}</p>
         <label>
           Output {outputAxis}{' '}
           <input
