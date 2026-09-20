@@ -122,9 +122,9 @@ export function lessonOperations(
     return [
       {
         kind: 'exp',
-        title: 'Turn scores into positive contributions',
+        title: 'Convert scores for softmax',
         caption:
-          'Subtract the largest score for numerical stability, then exponentiate. A masked score of −∞ becomes exactly zero.',
+          'Softmax first converts scores into non-negative values. Subtracting the largest score prevents very large intermediate numbers without changing the final probabilities.',
         input,
         output: exp,
         inputName: 'Scores',
@@ -134,9 +134,9 @@ export function lessonOperations(
       },
       {
         kind: 'divide',
-        title: 'Divide by the row total',
+        title: 'Make the weights add up to 1',
         caption:
-          'Divide every contribution by their sum. The resulting non-negative weights sum to 1.',
+          'Each output tells you what fraction of the total belongs to that token. Divide each input value by the sum of the whole row.',
         input: exp,
         output,
         inputName: 'Exponential contributions',
@@ -176,7 +176,15 @@ export function lessonOperations(
       {
         kind: 'mask',
         title: 'Hide future tokens',
-        caption: `Query “${words[token]}” can use its own position and earlier positions. Future positions become −∞ before softmax.`,
+        caption:
+          token < words.length - 1
+            ? `Each column represents a key token that “${words[token]}” could attend to. Hide the later tokens ${words
+                .slice(token + 1)
+                .map((word, i) => `“${word}” (position ${token + 1 + i})`)
+                .join(
+                  ', ',
+                )}. Keep this query’s own position and everything before it.`
+            : `Each column represents a key token that “${words[token]}” could attend to. This query is the last token, so there are no later tokens to hide.`,
         input: scores,
         output: masked,
         inputName: 'Scaled scores',

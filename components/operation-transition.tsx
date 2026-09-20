@@ -121,6 +121,51 @@ export default function OperationTransition({
   const paint = (v: number) =>
     Number.isFinite(v) ? heatmapCell(v, scale, false).color : '#14232b';
   const number = (v: number) => (Number.isFinite(v) ? v.toFixed(2) : '−∞');
+  const explanation: string[] = {
+    norm: [
+      `The average of this token’s features is ${op.mean?.toFixed(4)}. Subtract it from each feature.`,
+      `Then divide by ${op.divisor?.toFixed(4)}, the row’s standard deviation with a small stabilising term.`,
+      'This changes the values, while keeping the same number of features.',
+    ],
+    exp: [
+      `First subtract the largest score in this row (${op.mean?.toFixed(4)}) from every score.`,
+      'Then raise e (about 2.718) to each result. Larger scores still give larger values.',
+      step === 6
+        ? 'A hidden score of negative infinity becomes 0 here.'
+        : 'These values will be divided by their total to become probabilities.',
+    ],
+    divide: [
+      `Add the values in the input row. Their total is ${op.divisor?.toFixed(4)}.`,
+      'Divide each value by that total to find its share of the whole.',
+      step === 6
+        ? 'The attention weights now add up to 1. Hidden tokens keep a weight of 0.'
+        : 'The probabilities now add up to 1, or 100%.',
+    ],
+    gelu: [
+      'Apply the GELU activation function to each feature on its own.',
+      'It reduces the magnitude of negative values and largely preserves large positive values.',
+      'All 48 features remain; their values change.',
+    ],
+    mask:
+      token < words.length - 1
+        ? [
+            `The query is “${words[token]}”, token ${token}. Token positions are counted from 0.`,
+            'Tokens after it get a score of −∞ (negative infinity), marking them as hidden.',
+            'Softmax will turn each hidden score into an attention weight of 0.',
+          ]
+        : [
+            `The query is “${words[token]}”, the last token in this sentence.`,
+            'There are no later tokens to hide, so all scores in this row stay unchanged.',
+            'Softmax will turn these scores into attention weights.',
+          ],
+    join: [
+      'Take this token’s four features from each of the three heads.',
+      'Place the groups next to each other to make a row of twelve features.',
+      'Nothing is added or recalculated; the same values are simply regrouped.',
+    ],
+    add: [],
+    project: [],
+  }[op.kind];
   const renderRow = (
     values: number[],
     y: number,
@@ -338,9 +383,13 @@ export default function OperationTransition({
                 )}
                 {op.kind === 'project' && (
                   <>
-                    <text x="24" y="155" fill="#aabcc5" fontSize="13">
-                      Weight column for output {active} · {op.input.length}{' '}
-                      matching multiplications
+                    <text x="24" y="143" fill="#aabcc5" fontSize="13">
+                      To calculate output {active}, use all {op.input.length}{' '}
+                      input values.
+                    </text>
+                    <text x="24" y="160" fill="#aabcc5" fontSize="13">
+                      Multiply each input by its matching weight below, then add
+                      the products.
                     </text>
                     {op.input.map((v, i) => (
                       <g key={i}>
@@ -362,40 +411,17 @@ export default function OperationTransition({
                     ))}
                   </>
                 )}
-                {op.kind === 'norm' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    mean = {op.mean!.toFixed(4)} · √(variance + ε) ={' '}
-                    {op.divisor!.toFixed(4)}
+                {explanation.map((line, i) => (
+                  <text
+                    key={i}
+                    x="100"
+                    y={153 + i * 23}
+                    fill="#dce5e8"
+                    fontSize="13"
+                  >
+                    {line}
                   </text>
-                )}
-                {op.kind === 'exp' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    exp(score − largest score) · largest = {op.mean!.toFixed(4)}
-                  </text>
-                )}
-                {op.kind === 'divide' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    Each contribution ÷ total {op.divisor!.toFixed(4)} → sum of
-                    row = 1
-                  </text>
-                )}
-                {op.kind === 'gelu' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    GELU acts on each feature separately · 48 values in, 48
-                    values out
-                  </text>
-                )}
-                {op.kind === 'mask' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    Key position &gt; query position {token} → −∞ → zero after
-                    softmax
-                  </text>
-                )}
-                {op.kind === 'join' && (
-                  <text x="100" y="175" fill="#dce5e8" fontSize="15">
-                    Head 1 (f0–3) | head 2 (f0–3) | head 3 (f0–3) → 12 features
-                  </text>
-                )}
+                ))}
               </g>
               {renderRow(op.output, 245, op.outputName, true)}
               <text
@@ -406,7 +432,7 @@ export default function OperationTransition({
                 opacity={1 - move}
               >
                 {op.kind === 'join'
-                  ? 'Rearrangement only · no arithmetic'
+                  ? 'The values stay the same; only their grouping changes.'
                   : `${op.input.length} ${isTokenAxis ? 'key-token scores' : 'input features'} → ${op.output.length} ${outputAxis} · new values`}
               </text>
             </svg>
