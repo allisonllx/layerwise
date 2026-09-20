@@ -1,4 +1,5 @@
 'use client';
+import TokenSelector from './token-selector';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import type { Model } from '../lib/transformer';
@@ -9,11 +10,13 @@ export default function ValueMixing({
   model,
   words,
   token,
+  onTokenChange,
   children,
 }: {
   model: Model;
   words: string[];
   token: number;
+  onTokenChange: (token: number) => void;
   children: ReactNode;
 }) {
   const [progress, setProgress] = useState(0);
@@ -112,9 +115,15 @@ export default function ValueMixing({
             ))}
           </select>
         </label>
-        <span>
-          Query: {token} · {words[token]}
-        </span>
+        <TokenSelector
+          words={words}
+          token={token}
+          query
+          onChange={(next) => {
+            setPlaying(false);
+            onTokenChange(next);
+          }}
+        />
         <button
           className="secondary"
           onClick={() => {
@@ -122,9 +131,14 @@ export default function ValueMixing({
             seek(progress === 1 ? 0 : 1);
           }}
         >
-          {progress === 1 ? 'Show transformation' : 'Show complete result'}
+          {progress === 1 ? 'Back to animation' : 'Skip to result'}
         </button>
       </div>
+      <p className="result-shortcut-note">
+        {progress === 1
+          ? 'You’re viewing this step’s final result. Back to animation returns to the start, paused.'
+          : 'Skip to result skips this animation and opens the current step’s finished heatmap. It does not advance the lesson.'}
+      </p>
       <div className="mix-stage">
         <div
           className="mix-result"

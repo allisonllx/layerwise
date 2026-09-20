@@ -1,4 +1,5 @@
 'use client';
+import TokenSelector from './token-selector';
 import { useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { runModel } from '../lib/transformer';
@@ -10,6 +11,7 @@ type Props = {
   words: string[];
   step: number;
   token: number;
+  onTokenChange: (token: number) => void;
   projection: Projection;
 };
 const hues = ['#70d2c4', '#e5b76d', '#baa2ed'];
@@ -19,6 +21,7 @@ export default function Transformation({
   words,
   step,
   token,
+  onTokenChange,
   projection,
 }: Props) {
   const [progress, setProgress] = useState(0);
@@ -113,9 +116,15 @@ export default function Transformation({
               ))}
             </select>
           </label>
-          <span>
-            Query: {token} · {words[token]}
-          </span>
+          <TokenSelector
+            words={words}
+            token={token}
+            query
+            onChange={(next) => {
+              setPlaying(false);
+              onTokenChange(next);
+            }}
+          />
         </div>
       )}
       <div className="diagram-scroll">

@@ -1,4 +1,5 @@
 'use client';
+import TokenSelector from './token-selector';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import type { Model } from '../lib/transformer';
@@ -20,6 +21,7 @@ export default function OperationTransition({
   words,
   step,
   token,
+  onTokenChange,
   projection,
   mlp,
   zoom,
@@ -31,6 +33,7 @@ export default function OperationTransition({
   words: string[];
   step: number;
   token: number;
+  onTokenChange: (token: number) => void;
   projection: ProjectionChoice;
   mlp: MlpChoice;
   zoom: number;
@@ -239,9 +242,15 @@ export default function OperationTransition({
         ))}
       </div>
       <div className="transformation-selectors">
-        <span>
-          Token {token} · {words[token]}
-        </span>
+        <TokenSelector
+          words={words}
+          token={token}
+          query={step === 6}
+          onChange={(next) => {
+            setPlaying(false);
+            onTokenChange(next);
+          }}
+        />
         {step === 6 && (
           <label>
             Head{' '}
@@ -268,9 +277,14 @@ export default function OperationTransition({
             seek(progress === 1 ? 0 : 1);
           }}
         >
-          {progress === 1 ? 'Show transformation' : 'Show complete result'}
+          {progress === 1 ? 'Back to animation' : 'Skip to result'}
         </button>
       </div>
+      <p className="result-shortcut-note">
+        {progress === 1
+          ? 'You’re viewing this step’s final result. Back to animation returns to the start, paused.'
+          : 'Skip to result skips this animation and opens the current step’s finished heatmap. It does not advance the lesson.'}
+      </p>
       <div className="mix-stage">
         <div
           className="mix-result"

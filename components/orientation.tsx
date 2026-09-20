@@ -1,9 +1,14 @@
-export const tourSteps = [0, 4, 5, 6];
+export const tourSteps = [0, 6, 4, 5, 6];
 const cards = [
   {
     title: 'Start with the whole journey',
     body: 'Read the architecture on the left from top to bottom: words become features, attention mixes information between tokens, the feed-forward network transforms features, and the output gives next-token probabilities. Click a step whenever you want to jump.',
     hint: 'We’re at the first step: each word becomes a row of numbers.',
+  },
+  {
+    title: 'Choose a query, then watch or skip',
+    body: 'The Query token selector beside the animation chooses the row to follow. It stays in sync with the sentence buttons above. Head chooses which attention head to inspect. Play transformation starts the animation; pause or drag the slider to explore at your own pace.',
+    hint: 'Skip to result jumps straight to this step’s finished heatmap—it does not move to another lesson step. Back to animation returns to the beginning, paused.',
   },
   {
     title: 'Read the picture before the numbers',
@@ -17,7 +22,7 @@ const cards = [
   },
   {
     title: 'Compare the whole heatmap, then focus',
-    body: '“All tokens” keeps every row on the same scale, even after you click a token. “Focus token” deliberately dims other rows. The crossed-out upper triangle marks future tokens, whose attention weight is zero.',
+    body: 'Use “Skip to result” to open the completed heatmap. “All tokens” keeps every row on the same scale, even after you click a token. “Focus token” deliberately dims other rows. The crossed-out upper triangle marks future tokens, whose attention weight is zero.',
     hint: 'Use Values for numbers, Inspect a calculation for arithmetic, and Pseudocode for an outline of the operation. Next step or the arrow keys advance the lesson.',
   },
 ];

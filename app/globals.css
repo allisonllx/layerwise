@@ -1573,3 +1573,26 @@ h1 > span {
   width: 65px;
   padding: 5px;
 }
+
+.transformation-selectors label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.transformation-selectors select {
+  min-width: 64px;
+  padding: 8px 10px;
+}
+.result-shortcut-note {
+  color: #aabcc5;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 75ch;
+  margin: 0 0 16px;
+}
+.orientation-anchor {
+  scroll-margin-top: 24px;
+}
+.orientation-anchor:focus {
+  outline: none;
+}

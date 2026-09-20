@@ -38,6 +38,7 @@ import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
   const lessonStart = useRef<HTMLDivElement>(null);
+  const orientationStart = useRef<HTMLDivElement>(null);
   const [navigation, setNavigation] = useState(0);
   const [step, setStep] = useState(0),
     [token, setToken] = useState(2),
@@ -65,12 +66,14 @@ export default function Home() {
   }, []);
   useLayoutEffect(() => {
     if (!navigation) return;
-    lessonStart.current?.focus({ preventScroll: true });
-    lessonStart.current?.scrollIntoView({
+    const target =
+      tour === null ? lessonStart.current : orientationStart.current;
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({
       block: 'start',
       behavior: 'instant',
     });
-  }, [navigation]);
+  }, [navigation, tour]);
   useEffect(() => {
     if (!replay) return;
     setPhase(0);
@@ -190,6 +193,10 @@ export default function Home() {
     step === 10
       ? `[1, ${words.length}, ${mlp === 'up' || mlp === 'activated' ? 48 : 12}]`
       : current.output;
+  const selectToken = (next: number) => {
+    setToken(next);
+    setSelection(null);
+  };
   const choose = (s: Selection) => {
     setSelection(s);
     setToken(s.row);
@@ -338,7 +345,17 @@ export default function Home() {
         </aside>
         <section className={'lesson' + (tour !== null ? ' is-orienting' : '')}>
           {tour !== null && (
-            <Orientation index={tour} onMove={moveTour} onFinish={finishTour} />
+            <div
+              ref={orientationStart}
+              tabIndex={-1}
+              className="orientation-anchor"
+            >
+              <Orientation
+                index={tour}
+                onMove={moveTour}
+                onFinish={finishTour}
+              />
+            </div>
           )}
           <div className="breadcrumb">
             Transformer walkthrough <span>/</span> {current.section}
@@ -523,6 +540,7 @@ export default function Home() {
                 words={words}
                 step={step}
                 token={token}
+                onTokenChange={selectToken}
                 projection={projection}
               />
             )}
@@ -532,6 +550,7 @@ export default function Home() {
                 model={model}
                 words={words}
                 token={token}
+                onTokenChange={selectToken}
               >
                 {resultCanvas}
               </ValueMixing>
@@ -542,6 +561,7 @@ export default function Home() {
                 words={words}
                 step={step}
                 token={token}
+                onTokenChange={selectToken}
                 projection={projection}
                 mlp={mlp}
                 zoom={zoom}
