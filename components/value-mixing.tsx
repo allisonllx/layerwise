@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import type { Model } from '../lib/transformer';
+import HeadLabels from './head-labels';
 import { heatmapCell, heatmapScale } from '../lib/heatmap';
 
 export default function ValueMixing({
@@ -271,22 +272,9 @@ export default function ValueMixing({
             {stage >= 4 &&
               model.context.map((panel, h) => (
                 <g key={h} opacity={h === head ? place : revealHeads}>
-                  <text
-                    x={cellX(h, 0)}
-                    y={(35 * 800) / 850}
-                    fill={['#70d2c4', '#e5ba7c', '#b8a4e7'][h]}
-                    fontSize="13"
-                  >
-                    HEAD {h + 1}
-                  </text>
-                  <text
-                    x={cellX(h, 0)}
-                    y={(55 * 800) / 850}
-                    fill="#aabcc5"
-                    fontSize="11"
-                  >
-                    Rows (↓) tokens · features (→)
-                  </text>
+                  <g transform={`scale(${800 / 850})`}>
+                    <HeadLabels head={h} />
+                  </g>
                   {panel.map((row, r) => (
                     <g
                       key={r}

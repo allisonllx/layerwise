@@ -1,5 +1,6 @@
 'use client';
 import { type Model, type Matrix, vocabulary } from '../lib/transformer';
+import HeadLabels from './head-labels';
 import { heatmapCell, heatmapScale } from '../lib/heatmap';
 export type Selection = { row: number; col: number; head: number };
 export type Projection = 'q' | 'k' | 'v';
@@ -146,30 +147,36 @@ export default function TensorCanvas({
       {isHeads ? (
         panels.map((_, h) => (
           <g key={h}>
-            <text
-              x={99 + h * 245}
-              y="35"
-              fill={colors[h]}
-              className="head-label"
-            >
-              HEAD {h + 1}
-            </text>
-            <text
-              x={99 + h * 245}
-              y="53"
-              className="diagram-label"
-              style={{ fontSize: 11 }}
-            >
-              {score ? 'Rows (↓) query tokens' : 'Rows (↓) tokens'}
-            </text>
-            <text
-              x={99 + h * 245}
-              y="69"
-              className="diagram-label"
-              style={{ fontSize: 11 }}
-            >
-              {score ? 'Columns (→) key tokens' : 'Columns (→) features'}
-            </text>
+            {step === 7 ? (
+              <HeadLabels head={h} />
+            ) : (
+              <>
+                <text
+                  x={99 + h * 245}
+                  y="35"
+                  fill={colors[h]}
+                  className="head-label"
+                >
+                  HEAD {h + 1}
+                </text>
+                <text
+                  x={99 + h * 245}
+                  y="53"
+                  className="diagram-label"
+                  style={{ fontSize: 11 }}
+                >
+                  {score ? 'Rows (↓) query tokens' : 'Rows (↓) tokens'}
+                </text>
+                <text
+                  x={99 + h * 245}
+                  y="69"
+                  className="diagram-label"
+                  style={{ fontSize: 11 }}
+                >
+                  {score ? 'Columns (→) key tokens' : 'Columns (→) features'}
+                </text>
+              </>
+            )}
           </g>
         ))
       ) : (
