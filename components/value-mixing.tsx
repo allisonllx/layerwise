@@ -31,7 +31,7 @@ export default function ValueMixing({
       if (previous !== undefined)
         position.current = Math.min(
           1,
-          position.current + Math.min(time - previous, 100) / 12000,
+          position.current + Math.min(time - previous, 100) / 17000,
         );
       previous = time;
       setProgress(position.current);
@@ -42,26 +42,47 @@ export default function ValueMixing({
     return () => cancelAnimationFrame(frame);
   }, [playing]);
   const stage =
-    progress < 0.2
+    progress < 0.16
       ? 0
-      : progress < 0.48
+      : progress < 0.36
         ? 1
-        : progress < 0.72
+        : progress < 0.54
           ? 2
-          : progress < 0.92
+          : progress < 0.72
             ? 3
-            : 4;
+            : progress < 0.84
+              ? 4
+              : progress < 0.96
+                ? 5
+                : 6;
+  const smooth = (start: number, end: number) => {
+    const t = Math.max(0, Math.min(1, (progress - start) / (end - start)));
+    return t * t * (3 - 2 * t);
+  };
+  const outputY = 64 + words.length * 32 + 12;
+  const sceneHeight = outputY + 70;
+  const place = smooth(0.73, 0.83);
+  const revealRows = smooth(0.84, 0.89);
+  const revealHeads = smooth(0.89, 0.96);
+  const handoff = smooth(0.96, 1);
+  const fadeInputs = 1 - smooth(0.72, 0.79);
   const captions = [
     `Follow query “${words[token]}”: its attention row assigns one weight to each key token.`,
     'Each key token has a value vector: four features in this head. Match tokens across the two inputs.',
     'Multiply each attention weight by all four features of its matching value vector. Masked future tokens contribute zero.',
     `Add down each feature column. These four sums form the new feature row for “${words[token]}”.`,
-    'Repeat for every query and head. This is the complete, clickable result: rows are query tokens; columns are features.',
+    `Place “${words[token]}” into its row in head ${head + 1}. The four features stay together.`,
+    'Now repeat for the other query tokens, then for the other heads.',
+    'The complete result is ready to explore. Rows are query tokens; columns are features.',
   ];
   const weights = model.attention[head][token];
   const values = model.vh[head];
   const scale = heatmapScale(model.vh, false);
-  const collapse = Math.max(0, Math.min(1, (progress - 0.75) / 0.15));
+  const collapse = smooth(0.56, 0.68);
+  const resultScale = heatmapScale(model.context, false);
+  const cellX = (h: number, f: number) => ((99 + h * 245 + f * 29) * 800) / 850;
+  const cellY = (r: number) =>
+    ((82 + (8 - words.length) * 10 + r * 28) * 800) / 850;
   return (
     <section
       className="value-mixing"
@@ -69,7 +90,7 @@ export default function ValueMixing({
     >
       <div className="transformation-heading">
         <span className="section-label">WEIGHTS → MIXED FEATURES</span>
-        <span>{stage + 1} / 5</span>
+        <span>{stage + 1} / 7</span>
       </div>
       <p className="mix-caption">{captions[stage]}</p>
       <div className="transformation-selectors">
@@ -97,23 +118,39 @@ export default function ValueMixing({
           className="secondary"
           onClick={() => {
             setPlaying(false);
-            seek(progress >= 0.92 ? 0 : 1);
+            seek(progress === 1 ? 0 : 1);
           }}
         >
-          {progress >= 0.92 ? 'Show transformation' : 'Show complete result'}
+          {progress === 1 ? 'Show transformation' : 'Show complete result'}
         </button>
       </div>
       <div className="mix-stage">
-        {stage === 4 ? (
-          children
-        ) : (
-          <div className="diagram-scroll">
-            <svg
-              viewBox="0 0 800 420"
-              style={{ width: '100%', minWidth: 640 }}
-              role="img"
-              aria-label="Attention weights multiply matching value vectors; weighted vectors sum into one feature row"
-            >
+        <div
+          className="mix-result"
+          style={{
+            opacity: handoff,
+            pointerEvents: progress === 1 ? 'auto' : 'none',
+          }}
+          inert={progress !== 1}
+          aria-hidden={progress !== 1}
+        >
+          {children}
+        </div>
+        <div
+          className="diagram-scroll mix-animation"
+          style={{
+            opacity: 1 - handoff,
+            pointerEvents: progress === 1 ? 'none' : 'auto',
+          }}
+          aria-hidden={progress === 1}
+        >
+          <svg
+            viewBox={`0 0 800 ${sceneHeight}`}
+            style={{ width: '100%', minWidth: 640 }}
+            role="img"
+            aria-label="Attention weights multiply matching value vectors; weighted vectors sum into one feature row"
+          >
+            <g opacity={fadeInputs}>
               <text x="22" y="24" fill="#70d2c4" fontSize="15">
                 A · attention weights
               </text>
@@ -200,7 +237,7 @@ export default function ValueMixing({
                   </g>
                   <g
                     opacity={stage >= 2 ? 1 - collapse : 0.08}
-                    transform={`translate(0,${(350 - 64 - k * 32) * collapse})`}
+                    transform={`translate(0,${(outputY - 64 - k * 32) * collapse})`}
                   >
                     {values[k].map((v, f) => (
                       <g key={f}>
@@ -230,47 +267,122 @@ export default function ValueMixing({
                   </g>
                 </g>
               ))}
-              {stage === 3 && (
-                <g opacity={Math.max(0.2, collapse)}>
-                  <text x="22" y="369" fill="#70d2c4" fontSize="14">
-                    Output row · {words[token]}
+            </g>
+            {stage >= 4 &&
+              model.context.map((panel, h) => (
+                <g key={h} opacity={h === head ? place : revealHeads}>
+                  <text
+                    x={cellX(h, 0)}
+                    y={(35 * 800) / 850}
+                    fill={['#70d2c4', '#e5ba7c', '#b8a4e7'][h]}
+                    fontSize="13"
+                  >
+                    HEAD {h + 1}
                   </text>
-                  {model.context[head][token].map((v, f) => (
-                    <g key={f}>
-                      <rect
-                        x={520 + f * 55}
-                        y="350"
-                        width="49"
-                        height="28"
-                        rx="4"
-                        fill={heatmapCell(v, scale, false).color}
-                        stroke="#70d2c4"
-                      />
+                  <text
+                    x={cellX(h, 0)}
+                    y={(55 * 800) / 850}
+                    fill="#aabcc5"
+                    fontSize="11"
+                  >
+                    Rows (↓) tokens · features (→)
+                  </text>
+                  {panel.map((row, r) => (
+                    <g
+                      key={r}
+                      opacity={h === head && r !== token ? revealRows : 1}
+                    >
                       <text
-                        x={544 + f * 55}
-                        y="369"
-                        textAnchor="middle"
-                        fill={
-                          heatmapCell(v, scale, false).lightText
-                            ? '#dce5e8'
-                            : '#0b161c'
-                        }
+                        x={cellX(h, 0) - 7}
+                        y={cellY(r) + 14}
+                        textAnchor="end"
+                        fill={r === token ? '#70d2c4' : '#8599a4'}
                         fontSize="11"
                       >
-                        {v.toFixed(3)}
+                        {words[r]}
                       </text>
+                      {row.map((v, f) =>
+                        h === head && r === token ? null : (
+                          <rect
+                            key={f}
+                            x={cellX(h, f)}
+                            y={cellY(r)}
+                            width={(25 * 800) / 850}
+                            height={(23 * 800) / 850}
+                            rx="3"
+                            fill={heatmapCell(v, resultScale, false).color}
+                          />
+                        ),
+                      )}
                     </g>
                   ))}
                 </g>
-              )}
-              <text x="22" y="408" fill="#aabcc5" fontSize="13">
-                {stage < 3
-                  ? `One head: [1, ${words.length}] weights × [${words.length}, 4] value features`
-                  : 'One query → [1, 4] mixed features · the key-token axis is summed over'}
-              </text>
-            </svg>
-          </div>
-        )}
+              ))}
+            {stage >= 3 && (
+              <g opacity={Math.max(0.2, collapse)}>
+                <text
+                  x="22"
+                  y={outputY + 19}
+                  opacity={1 - place}
+                  fill="#70d2c4"
+                  fontSize="14"
+                >
+                  Output row · {words[token]}
+                </text>
+                {model.context[head][token].map((v, f) => (
+                  <g key={f}>
+                    <rect
+                      x={(520 + f * 55) * (1 - place) + cellX(head, f) * place}
+                      y={outputY * (1 - place) + cellY(token) * place}
+                      width={49 * (1 - place) + ((25 * 800) / 850) * place}
+                      height={28 * (1 - place) + ((23 * 800) / 850) * place}
+                      rx="4"
+                      fill={
+                        heatmapCell(
+                          v,
+                          scale * (1 - place) + resultScale * place,
+                          false,
+                        ).color
+                      }
+                      stroke="#70d2c4"
+                    />
+                    <text
+                      x={
+                        (544 + f * 55) * (1 - place) +
+                        (cellX(head, f) + 12) * place
+                      }
+                      y={
+                        (outputY + 19) * (1 - place) +
+                        (cellY(token) + 16) * place
+                      }
+                      textAnchor="middle"
+                      fill={
+                        heatmapCell(v, scale, false).lightText
+                          ? '#dce5e8'
+                          : '#0b161c'
+                      }
+                      fontSize="11"
+                      opacity={1 - place}
+                    >
+                      {v.toFixed(3)}
+                    </text>
+                  </g>
+                ))}
+              </g>
+            )}
+            <text
+              x="22"
+              y={sceneHeight - 12}
+              opacity={fadeInputs}
+              fill="#aabcc5"
+              fontSize="13"
+            >
+              {stage < 3
+                ? `One head: [1, ${words.length}] weights × [${words.length}, 4] value features`
+                : 'One query → [1, 4] mixed features · the key-token axis is summed over'}
+            </text>
+          </svg>
+        </div>
       </div>
       <div className="transformation-controls">
         <button

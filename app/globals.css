@@ -1531,3 +1531,13 @@ h1 > span {
 .mix-arithmetic p {
   line-height: 1.7;
 }
+
+.mix-stage {
+  display: grid;
+  align-items: start;
+}
+.mix-stage > .mix-result,
+.mix-stage > .mix-animation {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
