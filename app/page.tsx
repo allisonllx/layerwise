@@ -32,6 +32,7 @@ import OperationGuide from '../components/operation-guide';
 import Orientation, { tourSteps } from '../components/orientation';
 import { getDisplay } from '../components/tensor-canvas';
 import Transformation from '../components/transformation';
+import ValueMixing from '../components/value-mixing';
 import { heatmapScale } from '../lib/heatmap';
 
 export default function Home() {
@@ -498,30 +499,60 @@ export default function Home() {
                 projection={projection}
               />
             )}
-            <div className="diagram-scroll">
-              <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
-                <TensorCanvas
-                  key={`${step}-${example}`}
-                  model={model}
-                  words={words}
-                  step={step}
-                  token={token}
-                  focusToken={focusToken}
-                  numbers={numbers}
-                  projection={projection}
-                  mlp={mlp}
-                  phase={phase}
-                  selection={selection}
-                  onSelect={choose}
-                  equation={
-                    step === 2
-                      ? `${projection.toUpperCase()} = X · W${projection}`
-                      : current.equation
-                  }
-                  caption={current.caption}
-                />
+            {step === 7 ? (
+              <ValueMixing
+                key={example}
+                model={model}
+                words={words}
+                token={token}
+              >
+                <div className="diagram-scroll">
+                  <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
+                    <TensorCanvas
+                      key={`${step}-${example}`}
+                      model={model}
+                      words={words}
+                      step={step}
+                      token={token}
+                      focusToken={focusToken}
+                      numbers={numbers}
+                      projection={projection}
+                      mlp={mlp}
+                      phase={phase}
+                      selection={selection}
+                      onSelect={choose}
+                      equation={current.equation}
+                      caption={current.caption}
+                    />
+                  </div>
+                </div>
+              </ValueMixing>
+            ) : (
+              <div className="diagram-scroll">
+                <div style={{ width: `${zoom * 100}%`, minWidth: 640 }}>
+                  <TensorCanvas
+                    key={`${step}-${example}`}
+                    model={model}
+                    words={words}
+                    step={step}
+                    token={token}
+                    focusToken={focusToken}
+                    numbers={numbers}
+                    projection={projection}
+                    mlp={mlp}
+                    phase={phase}
+                    selection={selection}
+                    onSelect={choose}
+                    equation={
+                      step === 2
+                        ? `${projection.toUpperCase()} = X · W${projection}`
+                        : current.equation
+                    }
+                    caption={current.caption}
+                  />
+                </div>
               </div>
-            </div>
+            )}
             <div className="shape-strip compact-shapes">
               <span>SHAPES</span>
               <div className="shape-equations">

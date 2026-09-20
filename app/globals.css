@@ -1504,3 +1504,30 @@ h1 > span {
 .lesson-heading:focus {
   outline: none;
 }
+
+.value-mixing {
+  padding: 22px 20px;
+  border-block: 1px solid #293d46;
+  background: #0b161c;
+}
+.mix-caption {
+  min-height: 3.3em;
+  color: #c3d1d8;
+  line-height: 1.6;
+  font-size: 16px;
+}
+.mix-stage {
+  min-height: 320px;
+}
+.mix-arithmetic {
+  margin-top: 18px;
+  color: #aabcc5;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.mix-arithmetic summary {
+  cursor: pointer;
+}
+.mix-arithmetic p {
+  line-height: 1.7;
+}
