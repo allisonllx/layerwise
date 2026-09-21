@@ -29,7 +29,9 @@ import TensorCanvas, {
 import { examples, runModel, getSteps } from '../lib/transformer';
 import TensorFlow from '../components/tensor-flow';
 import OperationGuide from '../components/operation-guide';
-import Orientation, { tourSteps } from '../components/orientation';
+import Orientation from '../components/orientation';
+import IntuitionCheck from '../components/intuition-check';
+import { journey, takeaways } from '../lib/journey';
 import { getDisplay } from '../components/tensor-canvas';
 import Transformation from '../components/transformation';
 import ValueMixing from '../components/value-mixing';
@@ -44,7 +46,7 @@ export default function Home() {
     [token, setToken] = useState(2),
     [numbers, setNumbers] = useState(false),
     [focusToken, setFocusToken] = useState(false),
-    [tour, setTour] = useState<number | null>(0),
+    [showWelcome, setShowWelcome] = useState(true),
     [example, setExample] = useState(0),
     [projection, setProjection] = useState<Projection>('q'),
     [mlp, setMlp] = useState<MlpStage>('down'),
@@ -59,21 +61,20 @@ export default function Home() {
     current = steps[step];
   const navigate = useCallback((n: number) => {
     setStep(Math.max(0, Math.min(11, n)));
-    setTour(null);
+    setShowWelcome(false);
     setSelection(null);
     setPhase(1);
     setNavigation((n) => n + 1);
   }, []);
   useLayoutEffect(() => {
     if (!navigation) return;
-    const target =
-      tour === null ? lessonStart.current : orientationStart.current;
+    const target = showWelcome ? orientationStart.current : lessonStart.current;
     target?.focus({ preventScroll: true });
     target?.scrollIntoView({
       block: 'start',
       behavior: 'instant',
     });
-  }, [navigation, tour]);
+  }, [navigation, showWelcome]);
   useEffect(() => {
     if (!replay) return;
     setPhase(0);
@@ -173,15 +174,9 @@ export default function Home() {
     } catch {}
     return () => lifecycle.abort();
   }, [navigate, steps, words.length]);
-  const moveTour = (index: number) => {
-    setFocusToken(false);
-    navigate(tourSteps[index]);
-    setTour(index);
-  };
-  const finishTour = () => {
-    navigate(0);
-
-    setTour(null);
+  const openWelcome = () => {
+    setShowWelcome(true);
+    setNavigation((n) => n + 1);
   };
   const scale = heatmapScale(
     getDisplay(model, step, projection, mlp),
@@ -248,8 +243,8 @@ export default function Home() {
           01 <span>/</span> Inside a transformer
         </span>
         <div className="header-tools">
-          <button className="orientation-reopen" onClick={() => moveTour(0)}>
-            Quick orientation
+          <button className="orientation-reopen" onClick={openWelcome}>
+            How to follow along
           </button>
           <button
             className="model-badge"
@@ -339,17 +334,19 @@ export default function Home() {
             </p>
           </div>
         </aside>
-        <section className={'lesson' + (tour !== null ? ' is-orienting' : '')}>
-          {tour !== null && (
+        <section className="lesson">
+          {showWelcome && (
             <div
               ref={orientationStart}
               tabIndex={-1}
               className="orientation-anchor"
             >
               <Orientation
-                index={tour}
-                onMove={moveTour}
-                onFinish={finishTour}
+                token={words[token]}
+                onFinish={() => {
+                  setShowWelcome(false);
+                  setNavigation((n) => n + 1);
+                }}
               />
             </div>
           )}
@@ -377,11 +374,15 @@ export default function Home() {
               <RotateCcw size={18} />
             </button>
           </div>
-          <p className="intro" aria-live="polite">
-            {current.intro}
-          </p>
+          <div className="journey-question" aria-live="polite">
+            <span className="section-label">
+              FOLLOWING “{words[token]}” · TOKEN {token + 1} OF {words.length}
+            </span>
+            <p>{journey[step].question(words[token])}</p>
+            <span className="watch-for">Watch for: {journey[step].watch}</span>
+          </div>
           <div className="input-strip">
-            <span className="section-label">SELECT A TOKEN</span>
+            <span className="section-label">FOLLOW A TOKEN</span>
             <div className="tokens">
               {words.map((w, i) => (
                 <button
@@ -429,58 +430,61 @@ export default function Home() {
                     }[mlp]
                   : current.matrixName}
               </span>
-              <div className="canvas-options">
-                <div
-                  className="heatmap-mode"
-                  role="group"
-                  aria-label="Heatmap view"
-                >
-                  <button
-                    aria-pressed={!focusToken}
-                    onClick={() => setFocusToken(false)}
+              <details className="display-options">
+                <summary>Display options</summary>
+                <div className="canvas-options">
+                  <div
+                    className="heatmap-mode"
+                    role="group"
+                    aria-label="Heatmap view"
                   >
-                    All tokens
+                    <button
+                      aria-pressed={!focusToken}
+                      onClick={() => setFocusToken(false)}
+                    >
+                      All tokens
+                    </button>
+                    <button
+                      aria-pressed={focusToken}
+                      onClick={() => setFocusToken(true)}
+                    >
+                      Focus token
+                    </button>
+                  </div>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={numbers}
+                      onChange={(e) => setNumbers(e.target.checked)}
+                    />{' '}
+                    Values
+                  </label>
+                  <button
+                    className="mini-button"
+                    disabled={zoom === 1}
+                    aria-label="Zoom out"
+                    onClick={() => setZoom(Math.max(1, zoom - 0.25))}
+                  >
+                    <Minus size={14} />
                   </button>
                   <button
-                    aria-pressed={focusToken}
-                    onClick={() => setFocusToken(true)}
+                    className="mini-button"
+                    disabled={zoom >= 1.75}
+                    aria-label="Zoom in"
+                    onClick={() => setZoom(Math.min(1.75, zoom + 0.25))}
                   >
-                    Focus token
+                    <Plus size={14} />
+                  </button>
+                  <button
+                    className="mini-button"
+                    aria-label="Replay transformation"
+                    title="Replay transformation"
+                    onClick={() => setReplay((r) => r + 1)}
+                  >
+                    <RotateCcw size={14} />
                   </button>
                 </div>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={numbers}
-                    onChange={(e) => setNumbers(e.target.checked)}
-                  />{' '}
-                  Values
-                </label>
-                <button
-                  className="mini-button"
-                  disabled={zoom === 1}
-                  aria-label="Zoom out"
-                  onClick={() => setZoom(Math.max(1, zoom - 0.25))}
-                >
-                  <Minus size={14} />
-                </button>
-                <button
-                  className="mini-button"
-                  disabled={zoom >= 1.75}
-                  aria-label="Zoom in"
-                  onClick={() => setZoom(Math.min(1.75, zoom + 0.25))}
-                >
-                  <Plus size={14} />
-                </button>
-                <button
-                  className="mini-button"
-                  aria-label="Replay transformation"
-                  title="Replay transformation"
-                  onClick={() => setReplay((r) => r + 1)}
-                >
-                  <RotateCcw size={14} />
-                </button>
-              </div>
+              </details>
             </div>
             {((step >= 2 && step <= 4) || step === 10) && (
               <div className="tensor-tabs">
@@ -567,20 +571,20 @@ export default function Home() {
                 {resultCanvas}
               </OperationTransition>
             ) : (
-              resultCanvas
+              <details
+                className="journey-detail complete-result"
+                key={`result-${step}`}
+              >
+                <summary>Explore the complete result</summary>
+                {resultCanvas}
+              </details>
             )}
-            <TensorFlow
-              step={step}
-              tokens={words.length}
-              projection={projection}
-              mlp={mlp}
-              onNavigate={(source, sourceProjection, sourceMlp) => {
-                if (sourceProjection) setProjection(sourceProjection);
-                if (sourceMlp) setMlp(sourceMlp);
-                navigate(source);
-              }}
-            />
           </div>
+          <p className="rounding-note">
+            Displayed numbers are rounded; calculations use full precision.
+            Adding the displayed values may therefore differ slightly from the
+            shown result—for example, −1.05 + (−0.05) may display a result of −1.09.
+          </p>
           <div className="heatmap-legend" aria-label="Heatmap colour scale">
             <span>
               {step === 6 || step === 11 ? '0' : `−${scale.toFixed(2)}`}
@@ -603,22 +607,116 @@ export default function Home() {
                 : 'One scale for all rows and heads. Selection only adds an outline.'}
             </span>
           </div>
-          <OperationGuide
-            step={step}
-            tokens={words.length}
-            projection={projection}
-          />
-          <div className="under-canvas">
-            <div>
-              <span className="section-label">THE INTUITION</span>
-              <h3>{current.intuition}</h3>
-              <p>{current.detail}</p>
+          <section className="journey-takeaway" aria-label="Step takeaway">
+            <span className="section-label">THE TAKEAWAY</span>
+            <h2>{current.intuition}</h2>
+            <p>{takeaways[step]}</p>
+          </section>
+          <IntuitionCheck step={step} key={`intuition-${step}`} />
+          <footer className="lesson-controls">
+            <button
+              className="secondary"
+              disabled={step === 0}
+              onClick={() => {
+                navigate(step - 1);
+              }}
+            >
+              <ArrowLeft size={17} /> Back
+            </button>
+            <div className="playback">
+              <div className="progress-dots">
+                {steps.map((s, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Step ${i + 1}: ${s.short}`}
+                    title={s.short}
+                    aria-current={i === step ? 'step' : undefined}
+                    className={i === step ? 'active' : ''}
+                    onClick={() => {
+                      navigate(i);
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="progress-count">{step + 1} / 12</span>
             </div>
+            <button
+              className="primary"
+              onClick={() => {
+                navigate(step === 11 ? 0 : step + 1);
+              }}
+            >
+              {step === 11 ? 'Start again' : 'Next step'}{' '}
+              <ArrowRight size={17} />
+            </button>
+          </footer>
+          <section
+            className="journey-depth"
+            aria-label="Explore this step in detail"
+            key={`depth-${step}`}
+          >
+            <div className="depth-heading">
+              <h2>Go a little deeper</h2>
+              <p>
+                Optional. Open the question you’re curious about, or continue
+                the journey above.
+              </p>
+            </div>
+            <details className="journey-detail">
+              <summary>Where did these inputs come from?</summary>
+              <p className="detail-purpose">
+                Trace each input back to its earlier step, then compare it with
+                this step’s output.
+              </p>
+              <TensorFlow
+                view="origins"
+                step={step}
+                tokens={words.length}
+                projection={projection}
+                mlp={mlp}
+                onNavigate={(source, sourceProjection, sourceMlp) => {
+                  if (sourceProjection) setProjection(sourceProjection);
+                  if (sourceMlp) setMlp(sourceMlp);
+                  navigate(source);
+                }}
+              />
+            </details>
+            <details className="journey-detail">
+              <summary>How do the dimensions fit?</summary>
+              <p className="detail-purpose">
+                Read what each axis means and which dimensions the operation
+                keeps or combines.
+              </p>
+              <p className="detail-purpose">
+                {current.intro} {current.detail}
+              </p>
+              <TensorFlow
+                view="dimensions"
+                step={step}
+                tokens={words.length}
+                projection={projection}
+                mlp={mlp}
+                onNavigate={(source, sourceProjection, sourceMlp) => {
+                  if (sourceProjection) setProjection(sourceProjection);
+                  if (sourceMlp) setMlp(sourceMlp);
+                  navigate(source);
+                }}
+              />
+              <OperationGuide
+                step={step}
+                tokens={words.length}
+                projection={projection}
+              />
+            </details>
             <div className="detail-stack">
               <details className="code-box">
                 <summary>
-                  <Code2 size={17} /> Pseudocode <ChevronDown size={16} />
+                  <Code2 size={17} /> How would I write this?{' '}
+                  <ChevronDown size={16} />
                 </summary>
+                <p className="detail-purpose">
+                  Connect the visual operation to Python-like pseudocode.
+                </p>
                 <pre>{current.code}</pre>
                 <p className="code-caption">
                   Python-like pseudocode, not runnable PyTorch. Setup, imports
@@ -632,9 +730,13 @@ export default function Home() {
                   open={selection !== null ? true : undefined}
                 >
                   <summary>
-                    <MousePointer2 size={15} /> Inspect a calculation{' '}
+                    <MousePointer2 size={15} /> How was this number calculated?{' '}
                     <ChevronDown size={16} />
                   </summary>
+                  <p className="detail-purpose">
+                    Choose a cell in the result, or select its coordinates here,
+                    to inspect the calculation.
+                  </p>
                   <div className="inspector-controls">
                     <label>
                       Row{' '}
@@ -708,44 +810,8 @@ export default function Home() {
                 </details>
               )}
             </div>
-          </div>
-          <footer className="lesson-controls">
-            <button
-              className="secondary"
-              disabled={step === 0}
-              onClick={() => {
-                navigate(step - 1);
-              }}
-            >
-              <ArrowLeft size={17} /> Back
-            </button>
-            <div className="playback">
-              <div className="progress-dots">
-                {steps.map((s, i) => (
-                  <button
-                    key={i}
-                    aria-label={`Step ${i + 1}: ${s.short}`}
-                    title={s.short}
-                    aria-current={i === step ? 'step' : undefined}
-                    className={i === step ? 'active' : ''}
-                    onClick={() => {
-                      navigate(i);
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="progress-count">{step + 1} / 12</span>
-            </div>
-            <button
-              className="primary"
-              onClick={() => {
-                navigate(step === 11 ? 0 : step + 1);
-              }}
-            >
-              {step === 11 ? 'Start again' : 'Next step'}{' '}
-              <ArrowRight size={17} />
-            </button>
-          </footer>
+          </section>
+
           <p className="model-disclaimer">
             Illustrative weights · Untrained model · Use ← → to step through
           </p>

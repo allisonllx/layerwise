@@ -284,8 +284,8 @@ export default function Transformation({
           {playing
             ? 'Pause'
             : progress === 1
-              ? 'Replay transformation'
-              : 'Play transformation'}
+              ? 'Replay'
+              : 'Play'}
         </button>
         <button
           className="mini-button"
@@ -314,7 +314,8 @@ export default function Transformation({
         <output>{Math.round(progress * 100)}%</output>
       </div>
       <p className="transformation-note">
-        Drag to explore at your own pace. The complete result heatmap is below.
+        Drag to explore at your own pace. Open “Explore the complete result”
+        below to inspect every cell.
       </p>
     </section>
   );

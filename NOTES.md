@@ -25,3 +25,11 @@ Define 4 as query/key features per head beside the attention scaling factor. Rep
 ## Numeric shape follow-up
 
 Each tensor now shows its concrete numeric array directly above the corresponding symbolic array. The nearby legend only explains symbol meanings, without repeating sizes. Compiler and production build passed.
+
+## Guided token journey trial — 2026-09-21
+
+Replaced the multi-page orientation with a short token-journey introduction. Each step now has a token-specific question, a watch-for cue, a concise takeaway, and onward navigation before optional reference material. Inputs/origins, dimensions/glossary, pseudocode, and the cell inspector use question-labelled disclosures. Display controls and the separate full results on reshape/permute/score steps are collapsed initially. Three optional intuition checks provide immediate explanatory feedback. Selected tokens persist through step navigation; reference disclosures reset on a new step. Numerical model unchanged.
+
+Verified: TypeScript and production build; browser checks for welcome dismissal, token selection and continuity, dimension expansion, input-origin navigation, intuition feedback, and narrow-screen layout. Trial is local; hosted site has not been updated.
+
+Lint: the new journey metadata, orientation and intuition-check files pass. Existing lint findings remain in the page (effect state update, internal anchor, group role) and tensor-flow SVG role.

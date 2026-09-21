@@ -8,7 +8,9 @@ export default function TensorFlow({
   projection,
   mlp,
   onNavigate,
+  view = 'dimensions',
 }: {
+  view?: 'origins' | 'dimensions';
   step: number;
   tokens: number;
   projection: Projection;
@@ -146,11 +148,13 @@ export default function TensorFlow({
                 <small>{item.source}</small>
               )}
             </div>
-            <TensorShape text={item.shape} step={step} tensorIndex={i} />
+            {view === 'dimensions' && (
+              <TensorShape text={item.shape} step={step} tensorIndex={i} />
+            )}
           </div>
         ))}
         <p className="tensor-flow-operation">{operations[step]}</p>
-        {(step === 9 || step === 11) && (
+        {view === 'origins' && (step === 9 || step === 11) && (
           <div className="residual-explainer">
             <strong>
               Residual addition = earlier features + a new contribution
@@ -241,14 +245,18 @@ export default function TensorFlow({
               Produced in this step{step === 10 ? ' · selected MLP stage' : ''}
             </small>
           </div>
-          <TensorShape text={outputShapes[step]} step={step} output />
+          {view === 'dimensions' && (
+            <TensorShape text={outputShapes[step]} step={step} output />
+          )}
         </div>
       </div>
-      <ShapeLegend
-        input={inputs[step].map((item) => item.shape).join(' × ')}
-        output={outputShapes[step]}
-        step={step}
-      />
+      {view === 'dimensions' && (
+        <ShapeLegend
+          input={inputs[step].map((item) => item.shape).join(' × ')}
+          output={outputShapes[step]}
+          step={step}
+        />
+      )}
       {[0, 2, 8, 10, 11].includes(step) && (
         <p className="tensor-parameter-note">
           {step === 0

@@ -1,71 +1,42 @@
-export const tourSteps = [0, 6, 4, 5, 6];
-const cards = [
-  {
-    title: 'Start with the whole journey',
-    body: 'Read the architecture on the left from top to bottom: words become features, attention mixes information between tokens, the feed-forward network transforms features, and the output gives next-token probabilities. Click a step whenever you want to jump.',
-    hint: 'We’re at the first step: each word becomes a row of numbers.',
-  },
-  {
-    title: 'Choose a query, then watch or skip',
-    body: 'The Query token selector beside the animation chooses the row to follow. It stays in sync with the sentence buttons above. Head chooses which attention head to inspect. Play transformation starts the animation; pause or drag the slider to explore at your own pace.',
-    hint: 'Skip to result jumps straight to this step’s finished heatmap—it does not move to another lesson step. Back to animation returns to the beginning, paused.',
-  },
-  {
-    title: 'Read the picture before the numbers',
-    body: 'Each grid belongs to one attention head. A row follows one token; a column holds one feature. The batch contains one sentence, so it is not drawn as another grid. Click a word or cell to outline it and inspect a value.',
-    hint: 'All tokens remain visible on the same colour scale. Negative and positive values have different colours.',
-  },
-  {
-    title: 'Give every dimension a meaning',
-    body: 'A shape is an ordered list of axis sizes. Here, queries have token rows and feature columns; transposed keys have feature rows and token columns. The worked example under the grid labels what each number means.',
-    hint: 'The matching feature axis is summed away. The output keeps query tokens × key tokens.',
-  },
-  {
-    title: 'Compare the whole heatmap, then focus',
-    body: 'Use “Skip to result” to open the completed heatmap. “All tokens” keeps every row on the same scale, even after you click a token. “Focus token” deliberately dims other rows. The crossed-out upper triangle marks future tokens, whose attention weight is zero.',
-    hint: 'Use Values for numbers, Inspect a calculation for arithmetic, and Pseudocode for an outline of the operation. Next step or the arrow keys advance the lesson.',
-  },
-];
 export default function Orientation({
-  index,
-  onMove,
+  token,
   onFinish,
 }: {
-  index: number;
-  onMove: (index: number) => void;
+  token: string;
   onFinish: () => void;
 }) {
-  const card = cards[index];
   return (
-    <section className="orientation" aria-label="Quick orientation">
-      <div className="orientation-top">
-        <span className="section-label">
-          QUICK ORIENTATION · {index + 1} / {cards.length}
+    <section
+      className="orientation journey-welcome"
+      aria-label="How to follow along"
+    >
+      <span className="section-label">ONE TOKEN · TWELVE SMALL STEPS</span>
+      <h2>Follow “{token}” through a transformer.</h2>
+      <p>
+        Watch its numbers take shape, gather information from earlier words, and
+        become scores for the next token. The word stays the same; its
+        representation changes.
+      </p>
+      <div className="welcome-rhythm" aria-label="How each step works">
+        <span>
+          <b>1</b> Read the question
         </span>
-        <button onClick={onFinish}>Skip orientation</button>
+        <span>
+          <b>2</b> Play or scrub the animation
+        </span>
+        <span>
+          <b>3</b> Take one idea with you
+        </span>
       </div>
-      <div aria-live="polite">
-        <h2>{card.title}</h2>
-        <p>{card.body}</p>
-        <p className="orientation-hint">{card.hint}</p>
-      </div>
+      <p className="orientation-hint">
+        The detail is there when you want it. Open a question below each step to
+        explore inputs, dimensions, arithmetic or code.
+      </p>
       <div className="orientation-actions">
-        <button
-          className="secondary"
-          disabled={index === 0}
-          onClick={() => onMove(index - 1)}
-        >
-          Back
+        <button className="primary" onClick={onFinish}>
+          Follow this token →
         </button>
-        <span>You can reopen this guide anytime.</span>
-        <button
-          className="primary"
-          onClick={() =>
-            index === cards.length - 1 ? onFinish() : onMove(index + 1)
-          }
-        >
-          {index === cards.length - 1 ? 'Start the lesson' : 'Show me next →'}
-        </button>
+        <span>You can choose another token at any time.</span>
       </div>
     </section>
   );

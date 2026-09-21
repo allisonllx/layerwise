@@ -1660,3 +1660,205 @@ h1 > span {
     gap: 8px;
   }
 }
+
+/* Guided reading path; reference material remains available on demand. */
+.journey-question {
+  margin: 12px 0 26px;
+  max-width: 780px;
+}
+.journey-question > p {
+  font-size: 21px;
+  line-height: 1.5;
+  margin: 10px 0;
+  color: var(--ink);
+}
+.watch-for {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.welcome-rhythm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 25px;
+  margin: 22px 0;
+}
+.welcome-rhythm span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+}
+.welcome-rhythm b {
+  color: var(--cyan);
+  font-weight: 500;
+}
+.journey-takeaway {
+  border-left: 2px solid var(--cyan);
+  padding: 3px 0 3px 22px;
+  margin: 28px 0;
+  max-width: 780px;
+}
+.journey-takeaway h2 {
+  font:
+    24px/1.4 Georgia,
+    serif;
+  margin: 10px 0;
+}
+.journey-takeaway p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0;
+}
+.journey-depth {
+  border-top: 1px solid var(--line);
+  margin-top: 30px;
+  padding-top: 26px;
+}
+.depth-heading h2 {
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0 0 7px;
+}
+.depth-heading p,
+.detail-purpose {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.depth-heading {
+  margin-bottom: 20px;
+}
+.journey-detail {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+.journey-detail > summary {
+  padding: 17px 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.journey-detail > .detail-purpose {
+  padding: 0 20px;
+}
+.journey-detail > .detail-purpose + .tensor-flow {
+  margin-top: 24px;
+}
+.journey-detail > .operation-guide {
+  padding: 0 20px 16px;
+  margin: 0;
+}
+.journey-depth .detail-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.journey-depth .code-box {
+  margin: 0;
+}
+.journey-depth .code-box .detail-purpose {
+  padding: 0 18px;
+}
+.complete-result {
+  border-radius: 0;
+  border-width: 1px 0 0;
+  margin: 0;
+}
+.display-options {
+  position: relative;
+}
+.display-options > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 7px;
+}
+.display-options[open] .canvas-options {
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  .journey-question > p {
+    font-size: 18px;
+  }
+  .welcome-rhythm {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .journey-takeaway {
+    padding-left: 15px;
+  }
+  .journey-takeaway h2 {
+    font-size: 21px;
+  }
+  .display-options[open] .canvas-options {
+    max-width: 240px;
+  }
+}
+
+.journey-detail > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.journey-detail > summary::after {
+  content: '+';
+  margin-left: auto;
+  color: var(--cyan);
+}
+.journey-detail[open] > summary::after {
+  content: '−';
+}
+.intuition-check > summary > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.intuition-body {
+  padding: 0 20px 12px;
+}
+.intuition-body p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.intuition-body > p:last-child {
+  color: var(--muted);
+}
+.intuition-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.intuition-options button[aria-pressed='true'] {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+fieldset.intuition-options {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* Keep playback controls stable across Play, Pause and Replay. */
+.transformation-controls > .secondary {
+  width: 108px;
+  min-width: 108px;
+  flex: 0 0 108px;
+  justify-content: center;
+}
+
+.transformation .transformation-controls + .transformation-note {
+  margin-top: 18px;
+}
+
+.rounding-note {
+  margin: 16px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+  max-width: 85ch;
+}

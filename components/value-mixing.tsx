@@ -398,8 +398,8 @@ export default function ValueMixing({
           {playing
             ? 'Pause'
             : progress === 1
-              ? 'Replay transformation'
-              : 'Play transformation'}
+              ? 'Replay'
+              : 'Play'}
         </button>
         <button
           className="mini-button"
