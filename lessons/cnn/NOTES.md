@@ -1,13 +1,11 @@
-# CNN design-transfer trial
+# Complete CNN walkthrough
 
-Question: does Layerwise’s guided question → transformation → takeaway approach make convolution legible without exposing every detail at once?
+Extends the accepted convolution trial into seven connected steps: image input, convolution, ReLU, max pooling, flatten, dense logits and softmax. The local route is `/cnn`.
 
-Scope: one 6 × 6 grayscale image, two alternative hand-chosen 3 × 3 contrast kernels (one active output filter), stride 1 or 2, zero bias and no padding. Follow one output location and its receptive field, calculate nine products and their sum, then repeat across the feature map. No training, activation, pooling, multi-channel computation or classifier is implied.
+Architecture: a 6 × 6 grayscale input; two hand-chosen 3 × 3 kernels with zero bias and no padding; elementwise ReLU; 2 × 2 max pooling at stride 2; channel-major flattening; a fixed illustrative dense layer; two-class softmax. The user can select three images and convolution stride 1/2. Dense weights follow a fixed channel-based rule so the 8-feature and 2-feature configurations both work. This is a demonstration architecture, not a trained classifier.
 
-Run from the repository root with `npm run dev`; visit `/cnn`. The transformer stays at `/`. Model-specific code lives under `lessons/<model>/`; navigation, heatmap helpers and visual baseline remain shared. This deliberately avoids a generic lesson engine before a second full curriculum has established the right abstraction.
+Preserved design: question → manual animation → takeaway → navigation before optional detail, numeric and symbolic coloured dimensions, readable spacing, fixed-width playback and rounding disclosure. The convolution component keeps the accepted visual. Other stages expose real source/output values and selected calculations; Class A/B are explicitly illustrative.
 
-Design reference: `DESIGN.md` and local Incline feedback, particularly guided orientation, optional depth, comparable colours, stable Play/Pause/Replay widths, paragraph/divider spacing, and rounding disclosure. New CNN choices are proposals, not user-approved preferences.
+Checks cover independent pooling and constant-image fixtures, channel-major ordering, all example/stride combinations, normalised softmax and all inspectable coordinates. Existing transformer regression checks remain applicable. Browser verification checks stage handoffs and selection, both channels, stride changes, replay/seek and responsive layouts. User evaluation of the complete journey is still pending.
 
-Checks: independent numerical fixtures for kernel orientation, signed results, complete feature map, stride and last valid patch; TypeScript/build; new-code lint; existing 5,184 transformer sequences. Browser checks cover pause/replay, seek to result, selected boundary cell, stride reset, alternative filter, route switching, and 390px layout without page overflow. Manual playback changes discrete numerical states rather than moving geometry; a complete-result shortcut is available.
-
-Review next: whether the input-patch outline and matching-weight highlight establish the relationship clearly; whether the nine-product expansion is the right amount of detail; whether the overview-to-map expansion needs slower staging. Learning effectiveness and full CNN curriculum coverage are not established by these technical checks.
+Scope: one small CNN forward pass, not training, backpropagation, arbitrary uploaded images or a deeper architecture. Retain input-pixel contributions rather than implying a pixel keeps its identity after pooling.

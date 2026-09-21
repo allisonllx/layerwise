@@ -95,7 +95,7 @@ Preserve the lesson contract; choose a truthful unit of attention for the archit
 
 **VAE boundaries:** distinguish the distribution parameters from the sampled latent vector and from the reconstruction. State the parameterisation used by the implementation (for example, standard deviation versus log variance) before showing arithmetic. Make randomness visible and reproducible for inspection. Separate the inference walkthrough from an optional training explanation; do not imply that reconstruction and regularisation losses are sequential inference layers. Label untrained reconstructions honestly.
 
-These are design proposals. The local `/cnn` trial now implements the single-channel convolution portion; the full CNN curriculum and VAE treatment remain unimplemented. Verify model-specific calculations against the chosen implementation when building them.
+These are design proposals. The `/cnn` lesson now extends the accepted convolution trial into a complete small CNN forward pass; the extended journey awaits user evaluation. VAE remains unimplemented. Verify model-specific calculations against the chosen implementation when building them.
 
 ## Reuse and evaluation
 

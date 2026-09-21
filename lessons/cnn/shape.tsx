@@ -20,7 +20,7 @@ export default function CnnShape({
   };
   const output = {
     symbol: 'Cₒᵤₜ',
-    value: 1,
+    value: 2,
     name: 'output channels',
     tone: 'channel',
   };

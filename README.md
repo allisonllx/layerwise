@@ -2,7 +2,7 @@
 
 **Understand a neural network by following the data through it.**
 
-Layerwise is an interactive learning tool for exploring neural network architectures, tensor dimensions, and the calculations behind each layer. The transformer lesson walks through a small decoder transformer, from word embeddings to next-token probabilities. A separate CNN trial applies the same teaching style to one convolution.
+Layerwise is an interactive learning tool for exploring neural network architectures, tensor dimensions, and the calculations behind each layer. The transformer lesson walks through a small decoder transformer, from word embeddings to next-token probabilities. A separate CNN walkthrough follows a complete small classifier from pixels to probabilities.
 
 It grew out of a practical learning problem: architecture diagrams show the blocks, but it can still be hard to understand what a tensor represents, why its shape changes, or how a reshape differs from a permutation.
 
@@ -39,13 +39,15 @@ Choose among sentences containing 4, 6, or 8 tokens to see how sequence length c
 
 Displayed numbers are rounded, while calculations use full precision. The rounded operands may therefore appear not to add up to the displayed result—for example, −1.05 + (−0.05) may show a result of −1.09.
 
-## CNN trial
+## Follow an image through a CNN
 
-Open `/cnn` locally, or use the model switcher. Follow a selected 3 × 3 input patch through multiplication and summation, then expand to the complete feature map. The trial uses a 6 × 6 grayscale image, one input/output channel, hand-chosen contrast filters, zero bias and no padding.
+Open `/cnn`, or use the model switcher. Seven connected stages follow **image input → convolution → ReLU → max pooling → flatten → class scores → softmax**. Each stage uses the actual numerical output of the previous one.
 
-Choose another output cell, compare the two filters, or change stride from 1 to 2 inside the dimensions disclosure. The displayed patch, arithmetic and shapes update together. Playback starts paused and pauses when the canvas leaves the viewport or the tab is hidden. The main path keeps the transformer’s question → animation → takeaway rhythm, with input origins, dimensions, pseudocode and arithmetic available on demand.
+The example has a 6 × 6 grayscale input, two hand-chosen 3 × 3 contrast filters, no convolution padding, zero convolution bias, 2 × 2 max pooling with stride 2, and a fixed dense layer with two illustrative classes. Three input examples and convolution stride 1/2 let you see how the whole forward pass changes. Stride 1 produces eight flattened features; stride 2 produces two. The illustrative dense weights follow the same per-channel rule for either size; this is a teaching setup, not resizing a trained classifier.
 
-This tests the design transfer with one representative operation. It is not yet a full CNN lesson with activations, pooling, multiple channels and classification.
+Inspect either channel, follow a convolution cell through ReLU and its pooling window, then locate its value in the flattened vector. Select a class or feature in the dense stage to inspect its contribution. Softmax shows shifting, exponentiation and normalisation. Class A/B are demonstration labels and the untrained model’s probabilities are not meaningful predictions.
+
+Playback starts paused, supports scrubbing and complete-result shortcuts, and pauses when the canvas leaves view or the tab is hidden. Each step retains optional origins, coloured dimensions, pseudocode and arithmetic. Prediction checks ask about ReLU, flattening and confidence without blocking navigation.
 
 ## About the transformer model
 
@@ -102,7 +104,7 @@ React, TypeScript, Vinext/Vite, Tailwind CSS, SVG visualisations, and Lucide ico
 ```text
 app/
   page.tsx                  Transformer route (/)
-  cnn/page.tsx              CNN trial route (/cnn)
+  cnn/page.tsx              CNN walkthrough route (/cnn)
   globals.css               Shared visual language and existing lesson styles
 lessons/
   transformer/
@@ -110,8 +112,11 @@ lessons/
     components/             Tensor diagrams, players, guides and inspection
     lib/                    Transformer computation, transitions and journey copy
   cnn/
-    lesson.tsx              Guided convolution trial and interactive diagrams
-    model.ts                Teaching image, kernels and numerical convolution
+    full-lesson.tsx         Seven-stage CNN navigation and shared model state
+    lesson.tsx              Preserved convolution animation and explanations
+    stage-player.tsx        Other forward-pass operations
+    stages.ts               Questions, shape explanations and arithmetic
+    model.ts                Images, kernels and complete numerical forward pass
     styles.css              CNN-specific layout
     NOTES.md                Trial question, scope and verification
 components/
@@ -125,7 +130,7 @@ DESIGN.md                   Reusable design guide backed by local Incline feedba
 
 ## Current scope
 
-This is an exploratory learning prototype with a twelve-step transformer lesson and a focused convolution trial. It does not yet import model files or papers, simulate training, or provide a full CNN pipeline, VAE, or video lesson. The current visualisations use interactive 2D grids and animations.
+This is an exploratory learning prototype with a twelve-step transformer lesson and a seven-step CNN walkthrough. It does not yet import model files or papers, simulate training, or provide training, deeper CNN architectures, VAE, or video lessons. The current visualisations use interactive 2D grids and animations.
 
 Future directions include additional architectures, richer input examples, and connecting a paper’s architecture to its implementation. Feedback on what remains confusing is especially useful for shaping those lessons.
 

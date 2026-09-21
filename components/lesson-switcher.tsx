@@ -13,7 +13,7 @@ export default function LessonSwitcher({
         Transformer
       </Link>
       <Link href="/cnn" aria-current={current === 'cnn' ? 'page' : undefined}>
-        CNN <small>trial</small>
+        CNN
       </Link>
     </nav>
   );
