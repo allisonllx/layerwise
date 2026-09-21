@@ -3,7 +3,7 @@ import TokenSelector from './token-selector';
 import { useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { runModel } from '../lib/transformer';
-import { heatmapCell, heatmapScale } from '../lib/heatmap';
+import { heatmapCell, heatmapScale } from '../../../lib/heatmap';
 import type { Projection } from './tensor-canvas';
 
 type Props = {

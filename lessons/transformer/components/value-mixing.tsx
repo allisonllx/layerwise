@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import type { Model } from '../lib/transformer';
 import HeadLabels from './head-labels';
-import { heatmapCell, heatmapScale } from '../lib/heatmap';
+import { heatmapCell, heatmapScale } from '../../../lib/heatmap';
 
 export default function ValueMixing({
   model,

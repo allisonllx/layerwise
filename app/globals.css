@@ -1862,3 +1862,9 @@ fieldset.intuition-options {
   line-height: 1.65;
   max-width: 85ch;
 }
+
+/* Shared lesson navigation; each model owns its diagrams and computation. */
+.lesson-switcher {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:7px;padding:4px;font-size:12px;white-space:nowrap;}
+.lesson-switcher a {padding:7px 10px;border-radius:4px;color:var(--muted);}
+.lesson-switcher a[aria-current="page"] {background:#19322f;color:var(--cyan);}
+.lesson-switcher small {font-size:10px;color:var(--gold);margin-left:4px;}

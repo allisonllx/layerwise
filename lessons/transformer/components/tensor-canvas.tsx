@@ -1,7 +1,7 @@
 'use client';
 import { type Model, type Matrix, vocabulary } from '../lib/transformer';
 import HeadLabels from './head-labels';
-import { heatmapCell, heatmapScale } from '../lib/heatmap';
+import { heatmapCell, heatmapScale } from '../../../lib/heatmap';
 export type Selection = { row: number; col: number; head: number };
 export type Projection = 'q' | 'k' | 'v';
 export type MlpStage = 'n2' | 'up' | 'activated' | 'down';

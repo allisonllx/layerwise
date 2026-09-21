@@ -2,7 +2,7 @@
 
 **Understand a neural network by following the data through it.**
 
-Layerwise is an interactive learning tool for exploring neural network architectures, tensor dimensions, and the calculations behind each layer. The first prototype walks through a small decoder transformer, from word embeddings to next-token probabilities.
+Layerwise is an interactive learning tool for exploring neural network architectures, tensor dimensions, and the calculations behind each layer. The transformer lesson walks through a small decoder transformer, from word embeddings to next-token probabilities. A separate CNN trial applies the same teaching style to one convolution.
 
 It grew out of a practical learning problem: architecture diagrams show the blocks, but it can still be hard to understand what a tensor represents, why its shape changes, or how a reshape differs from a permutation.
 
@@ -39,7 +39,15 @@ Choose among sentences containing 4, 6, or 8 tokens to see how sequence length c
 
 Displayed numbers are rounded, while calculations use full precision. The rounded operands may therefore appear not to add up to the displayed result—for example, −1.05 + (−0.05) may show a result of −1.09.
 
-## About the model
+## CNN trial
+
+Open `/cnn` locally, or use the model switcher. Follow a selected 3 × 3 input patch through multiplication and summation, then expand to the complete feature map. The trial uses a 6 × 6 grayscale image, one input/output channel, hand-chosen contrast filters, zero bias and no padding.
+
+Choose another output cell, compare the two filters, or change stride from 1 to 2 inside the dimensions disclosure. The displayed patch, arithmetic and shapes update together. Playback starts paused and pauses when the canvas leaves the viewport or the tab is hidden. The main path keeps the transformer’s question → animation → takeaway rhythm, with input origins, dimensions, pseudocode and arithmetic available on demand.
+
+This tests the design transfer with one representative operation. It is not yet a full CNN lesson with activations, pooling, multiple channels and classification.
+
+## About the transformer model
 
 All numerical calculations run in the browser using deterministic, **untrained illustrative weights**.
 
@@ -93,31 +101,36 @@ React, TypeScript, Vinext/Vite, Tailwind CSS, SVG visualisations, and Lucide ico
 
 ```text
 app/
-  page.tsx                  Lesson navigation and interaction state
-  globals.css               Layout, visual styling, and responsive behaviour
+  page.tsx                  Transformer route (/)
+  cnn/page.tsx              CNN trial route (/cnn)
+  globals.css               Shared visual language and existing lesson styles
+lessons/
+  transformer/
+    lesson.tsx              Transformer navigation and interaction state
+    components/             Tensor diagrams, players, guides and inspection
+    lib/                    Transformer computation, transitions and journey copy
+  cnn/
+    lesson.tsx              Guided convolution trial and interactive diagrams
+    model.ts                Teaching image, kernels and numerical convolution
+    styles.css              CNN-specific layout
+    NOTES.md                Trial question, scope and verification
 components/
-  tensor-canvas.tsx         Tensor grids and calculation inspection
-  tensor-shape.tsx          Numeric shapes, symbolic axes, and legend
-  operation-guide.tsx       Dimension examples and symbol explanations
-  orientation.tsx           Short introduction to the token journey
-  intuition-check.tsx       Optional predictions and explanatory feedback
-  tensor-flow.tsx           Input origins, output shapes, and residual shortcuts
-  transformation.tsx        Reshape, permutation, and attention-score animations
-  operation-transition.tsx  Guided calculation animations
-  value-mixing.tsx          Attention weights to mixed features
+  lesson-switcher.tsx       Shared model navigation
+  ui/                       General UI primitives
 lib/
-  transformer.ts            Numeric model and lesson content
   heatmap.ts                Shared heatmap colour mapping
-  journey.ts                Per-step questions, watch cues, and takeaways
-  lesson-transitions.ts     Operations used by the guided calculation players
+  utils.ts                  General utilities
+DESIGN.md                   Reusable design guide backed by local Incline feedback
 ```
 
 ## Current scope
 
-This is an exploratory learning prototype focused on one small transformer. It does not yet import model files or papers, simulate training, or provide CNN, VAE, image, or video lessons. The current visualisations use interactive 2D grids and animations.
+This is an exploratory learning prototype with a twelve-step transformer lesson and a focused convolution trial. It does not yet import model files or papers, simulate training, or provide a full CNN pipeline, VAE, or video lesson. The current visualisations use interactive 2D grids and animations.
 
 Future directions include additional architectures, richer input examples, and connecting a paper’s architecture to its implementation. Feedback on what remains confusing is especially useful for shaping those lessons.
 
 ### Validate guided calculations
 
 Run `node scripts/check-transitions.cjs` to check every new transition against the model across all examples, tokens, heads, projection choices and MLP stages.
+
+Run `node scripts/check-cnn.cjs` for independent convolution fixtures covering both kernel orientations, the complete feature map, stride and boundary patches.

@@ -7,7 +7,7 @@ const ts = require('typescript');
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'layerwise-transitions-'));
 try {
   for (const name of ['transformer', 'lesson-transitions']) {
-    const source = fs.readFileSync(path.join(__dirname, '..', 'lib', name + '.ts'), 'utf8');
+    const source = fs.readFileSync(path.join(__dirname, '..', 'lessons', 'transformer', 'lib', name + '.ts'), 'utf8');
     fs.writeFileSync(path.join(temporary, name + '.js'), ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText);
   }
   const {runModel, examples, gelu} = require(path.join(temporary, 'transformer.js'));

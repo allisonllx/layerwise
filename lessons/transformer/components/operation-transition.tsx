@@ -9,7 +9,7 @@ import {
   type ProjectionChoice,
   type MlpChoice,
 } from '../lib/lesson-transitions';
-import { heatmapCell } from '../lib/heatmap';
+import { heatmapCell } from '../../../lib/heatmap';
 
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
 const smooth = (x: number) => {
