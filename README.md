@@ -8,20 +8,36 @@ It grew out of a practical learning problem: architecture diagrams show the bloc
 
 [Open the hosted demo](https://layerwise.allisonlixuan.chatgpt.site/) — currently private; access is restricted to the owner. You can run the app locally using the instructions below.
 
-## Explore the transformer
+## Follow a token through the transformer
 
-- **An expandable architecture map:** jump between embeddings, attention, residual connections, the feed-forward network, and output.
-- **Twelve connected steps:** move forward and backward at your own pace. Every step includes an explicit transformation player with pause, replay, and a scrubber; playback never advances the lesson. Multi-operation steps include selectable stages, with the output of one becoming the next input.
-- **Numeric and symbolic shapes:** see `[1, 3, 6, 4]` alongside `[B, H, Tq, F]`, with a nearby key explaining each axis.
-- **Token tracking:** select a word or matrix cell to inspect its values and calculations.
-- **Comparable heatmaps:** All tokens preserves a shared colour scale across rows and heads. Focus token explicitly dims other rows.
-- **Attention internals:** explore queries, keys, values, head splitting, axis permutation, scores, causal masking, and weighted value mixtures.
-- **Feed-forward stages:** inspect normalisation, expansion from 12 to 48 features, GELU activation, and compression back to 12.
-- **Guided calculations:** follow one token through additions, normalisation, projections, masking, softmax, GELU, and head joining, then explore the complete result. Expand the arithmetic to inspect individual output features.
-- **Contextual explanations:** named rows and columns, symbol definitions, worked dimension examples, and clearly labelled pseudocode.
-- **A quick orientation:** a skippable guide introduces the architecture, grids, dimensions, and heatmap controls.
+Start with a short introduction, then choose a token to follow through twelve connected steps. Its word stays the same while its numerical representation changes. The selected token stays with you as you navigate.
 
-Choose among sentences containing 4, 6, or 8 tokens to see how the token dimensions change throughout the model. Diagrams support zoom and horizontal scrolling on smaller screens.
+Each step follows the same rhythm:
+
+1. **Read the question** and the short “Watch for” cue.
+2. **Explore the animation** using Play, Pause, Replay, or the scrubber. Playback never advances the lesson; multi-operation steps also let you select individual stages.
+3. **Read the takeaway**, then move to the next step when you are ready.
+
+The full explanations remain available under **Go a little deeper**:
+
+- **Where did these inputs come from?** names the tensors and links to the steps that produced them, including residual shortcuts.
+- **How do the dimensions fit?** shows numeric and symbolic shapes, axis meanings, and worked dimension examples.
+- **How would I write this?** connects the operation to Python-like pseudocode.
+- **How was this number calculated?** lets you inspect individual results using a cell selection or coordinates.
+
+Optional intuition checks at head splitting, causal masking, and weighted value mixing give immediate explanatory feedback. They are not required to continue.
+
+### What you can explore
+
+- **Architecture:** jump between embeddings, attention, residual connections, the feed-forward network, and output using the expandable map.
+- **Attention:** inspect queries, keys, values, head splitting, axis permutation, scores, masking, softmax, and weighted value mixtures.
+- **Feed-forward stages:** explore normalisation, expansion from 12 to 48 features, GELU activation, and compression back to 12.
+- **Complete results:** use Skip to result in guided players, or expand Explore the complete result beneath the reshape, permutation, and attention-score animations.
+- **Display options:** reveal numeric values, zoom, or choose between All tokens and Focus token. All tokens preserves a shared colour scale across rows and heads; Focus token explicitly dims other rows.
+
+Choose among sentences containing 4, 6, or 8 tokens to see how sequence length changes the tensor dimensions. Use the Back and Next step buttons or the left/right arrow keys to navigate. Diagrams support horizontal scrolling on smaller screens, and animations respect reduced-motion settings.
+
+Displayed numbers are rounded, while calculations use full precision. The rounded operands may therefore appear not to add up to the displayed result—for example, −1.05 + (−0.05) may show a result of −1.09.
 
 ## About the model
 
@@ -83,10 +99,17 @@ components/
   tensor-canvas.tsx         Tensor grids and calculation inspection
   tensor-shape.tsx          Numeric shapes, symbolic axes, and legend
   operation-guide.tsx       Dimension examples and symbol explanations
-  orientation.tsx           Introductory walkthrough
+  orientation.tsx           Short introduction to the token journey
+  intuition-check.tsx       Optional predictions and explanatory feedback
+  tensor-flow.tsx           Input origins, output shapes, and residual shortcuts
+  transformation.tsx        Reshape, permutation, and attention-score animations
+  operation-transition.tsx  Guided calculation animations
+  value-mixing.tsx          Attention weights to mixed features
 lib/
   transformer.ts            Numeric model and lesson content
   heatmap.ts                Shared heatmap colour mapping
+  journey.ts                Per-step questions, watch cues, and takeaways
+  lesson-transitions.ts     Operations used by the guided calculation players
 ```
 
 ## Current scope
