@@ -1,5 +1,8 @@
 'use client';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import ChannelOverview from './channel-overview';
+import { useMapFlight } from './use-map-flight';
+import { useSceneHeight } from './use-scene-height';
 import CnnShape from './shape';
 
 import { Play, Pause, RotateCcw } from 'lucide-react';
@@ -31,6 +34,21 @@ export default function ConvolutionStep({
   const isPlaying = playing && progress < 100;
   const [answer, setAnswer] = useState<number | null>(null);
   const animation = useRef<HTMLDivElement>(null);
+  const overviewAmount = Math.max(0, Math.min(1, (progress - 65) / 35));
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const sourceMapRef = useRef<HTMLDivElement>(null);
+  const targetMapRef = useRef<HTMLDivElement>(null);
+  const flightStyle = useMapFlight(
+    sceneRef,
+    sourceMapRef,
+    targetMapRef,
+    overviewAmount,
+  );
+  const sceneStyle = useSceneHeight(
+    sceneRef,
+    Math.min(1, overviewAmount / 0.36),
+  );
+  const operationProgress = Math.min(100, progress / 0.65);
   const kernel = kernels[kernelIndex];
   const output = convolve(image, kernel.values, stride);
   const size = output.length;
@@ -42,28 +60,28 @@ export default function ConvolutionStep({
       .filter((i) => i !== selected),
   ];
   const revealed =
-    progress < 65
+    operationProgress < 35
       ? 0
       : Math.min(
           order.length,
-          1 + Math.floor(((progress - 65) / 35) * (order.length - 1)),
+          1 + Math.floor(((operationProgress - 35) / 65) * (order.length - 1)),
         );
   const active =
-    progress > 65 && progress < 100
-      ? order[Math.max(0, revealed - 1)]
-      : selected;
+    operationProgress > 35 ? order[Math.max(0, revealed - 1)] : selected;
   const row = Math.floor(active / size),
     col = active % size;
   const terms = contributions(image, kernel.values, row, col, stride);
-  const count = progress >= 45 ? 9 : Math.floor((progress / 45) * 9);
+  const count =
+    operationProgress >= 25 ? 9 : Math.floor((operationProgress / 25) * 9);
   const sum = terms.slice(0, count).reduce((s, term) => s + term.product, 0);
-  const scale = Math.max(0.1, ...output.flat().map(Math.abs));
+  const maps = kernels.map((k) => convolve(image, k.values, stride));
+  const scale = Math.max(0.1, ...maps.flat(2).map(Math.abs));
   const stage =
-    progress < 45
+    operationProgress < 25
       ? '1 · Multiply matching values'
-      : progress < 65
+      : operationProgress < 35
         ? '2 · Add the nine products'
-        : progress < 100
+        : operationProgress < 100
           ? '3 · Reuse the kernel across the image'
           : 'One kernel, one complete feature map';
   const reset = () => {
@@ -73,13 +91,16 @@ export default function ConvolutionStep({
   useEffect(() => {
     if (!isPlaying) return;
     let previous = performance.now();
-    const timer = window.setInterval(() => {
+    let timer: number;
+    const tick = () => {
       const now = performance.now();
-      const delta = (now - previous) / 160;
+      const delta = (now - previous) / 90;
       previous = now;
       setProgress((p) => Math.min(100, p + delta));
-    }, 50);
-    return () => window.clearInterval(timer);
+      timer = requestAnimationFrame(tick);
+    };
+    timer = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(timer);
   }, [isPlaying]);
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -108,171 +129,241 @@ export default function ConvolutionStep({
   };
   return (
     <div className="cnn-convolution-step">
-      <div className="cnn-settings">
-        <label>
-          Filter{' '}
-          <select
-            value={kernelIndex}
-            onChange={(e) => {
-              setKernelIndex(Number(e.target.value));
-              reset();
-            }}
-          >
-            {kernels.map((k, i) => (
-              <option key={k.name} value={i}>
-                {k.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <span className="muted">
-          Inspect either filter; both feed the next layer. Choose an output cell
-          to follow its patch.
-        </span>
-      </div>
       <div className="canvas" ref={animation}>
         <div className="canvas-toolbar">
           <span>
             <i className="live-dot" />
-            {stage}
+            {overviewAmount > 0
+              ? overviewAmount < 0.48
+                ? '4 · This map is one feature channel'
+                : '5 · Another filter, another channel'
+              : stage}
           </span>
           <span className="cnn-stage-count">
-            {revealed} / {size * size} outputs
+            {overviewAmount > 0
+              ? `2 × ${size} × ${size} outputs`
+              : `${revealed} / ${size * size} outputs`}
           </span>
         </div>
-        <div className="cnn-diagram">
-          <div className="cnn-matrix-block">
-            <h3>
-              Image <small>input values</small>
-            </h3>
-            <p className="cnn-axis">Rows (↓) · Columns (→) · from 0</p>
-            <div
-              className="cnn-grid cnn-image"
-              style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
-            >
-              {image.flatMap((values, r) =>
-                values.map((value, c) => {
-                  const inPatch =
-                    r >= row * stride &&
-                    r < row * stride + 3 &&
-                    c >= col * stride &&
-                    c < col * stride + 3;
-                  const termIndex = (r - row * stride) * 3 + c - col * stride;
-                  return (
+        <div
+          className="cnn-scene"
+          ref={sceneRef}
+          style={
+            sceneStyle && flightStyle && overviewAmount > 0
+              ? {
+                  height: Math.max(
+                    sceneStyle.height,
+                    flightStyle.top + flightStyle.height + 24,
+                  ),
+                }
+              : sceneStyle
+          }
+        >
+          <div
+            className="cnn-focus-scene"
+            aria-hidden={overviewAmount >= 0.5}
+            inert={overviewAmount >= 0.5}
+            style={{
+              opacity: Math.max(0, 1 - overviewAmount / 0.22),
+            }}
+          >
+            <div className="cnn-diagram">
+              <div className="cnn-matrix-block">
+                <h3>
+                  Image <small>input values</small>
+                </h3>
+                <p className="cnn-axis">Rows (↓) · Columns (→) · from 0</p>
+                <div
+                  className="cnn-grid cnn-image"
+                  style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+                >
+                  {image.flatMap((values, r) =>
+                    values.map((value, c) => {
+                      const inPatch =
+                        r >= row * stride &&
+                        r < row * stride + 3 &&
+                        c >= col * stride &&
+                        c < col * stride + 3;
+                      const termIndex =
+                        (r - row * stride) * 3 + c - col * stride;
+                      return (
+                        <span
+                          key={`${r}-${c}`}
+                          className={
+                            'cnn-cell ' +
+                            (inPatch ? 'in-patch ' : '') +
+                            (inPatch &&
+                            termIndex === count - 1 &&
+                            operationProgress < 25
+                              ? 'current-term'
+                              : '')
+                          }
+                          style={{
+                            background: `rgb(${[0, 0, 0].map(() => 28 + value * 195).join(',')})`,
+                            color: value > 0.5 ? '#0d1318' : '#e5eaf0',
+                          }}
+                          title={`Image row ${r}, column ${c}: ${format(value)}`}
+                        >
+                          {value.toFixed(1)}
+                        </span>
+                      );
+                    }),
+                  )}
+                </div>
+                <p className="cnn-caption">
+                  Outlined: rows {row * stride}–{row * stride + 2}, columns{' '}
+                  {col * stride}–{col * stride + 2}
+                </p>
+              </div>
+              <span className="cnn-operator" aria-hidden="true">
+                ×
+              </span>
+              <div className="cnn-matrix-block cnn-kernel-block">
+                <h3>
+                  Kernel <small>fixed weights</small>
+                </h3>
+                <p className="cnn-axis">Match each position</p>
+                <div
+                  className="cnn-grid"
+                  style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+                >
+                  {kernel.values.flat().map((v, i) => (
                     <span
-                      key={`${r}-${c}`}
+                      key={i}
                       className={
                         'cnn-cell ' +
-                        (inPatch ? 'in-patch ' : '') +
-                        (inPatch && termIndex === count - 1 && progress < 45
+                        (i === count - 1 && operationProgress < 25
                           ? 'current-term'
                           : '')
                       }
-                      style={{
-                        background: `rgb(${[0, 0, 0].map(() => 28 + value * 195).join(',')})`,
-                        color: value > 0.5 ? '#0d1318' : '#e5eaf0',
-                      }}
-                      title={`Image row ${r}, column ${c}: ${format(value)}`}
+                      style={paint(v, 1)}
                     >
-                      {value.toFixed(1)}
+                      {v}
                     </span>
-                  );
-                }),
-              )}
-            </div>
-            <p className="cnn-caption">
-              Outlined: rows {row * stride}–{row * stride + 2}, columns{' '}
-              {col * stride}–{col * stride + 2}
-            </p>
-          </div>
-          <span className="cnn-operator" aria-hidden="true">
-            ×
-          </span>
-          <div className="cnn-matrix-block cnn-kernel-block">
-            <h3>
-              Kernel <small>fixed weights</small>
-            </h3>
-            <p className="cnn-axis">Match each position</p>
-            <div
-              className="cnn-grid"
-              style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
-            >
-              {kernel.values.flat().map((v, i) => (
-                <span
-                  key={i}
-                  className={
-                    'cnn-cell ' +
-                    (i === count - 1 && progress < 45 ? 'current-term' : '')
-                  }
-                  style={paint(v, 1)}
+                  ))}
+                </div>
+                <p className="cnn-caption">3 × 3 · bias = 0</p>
+              </div>
+              <span className="cnn-operator" aria-hidden="true">
+                →
+              </span>
+              <div className="cnn-matrix-block">
+                <h3>
+                  Feature map <small>computed output</small>
+                </h3>
+                <p className="cnn-axis">Rows (↓) · Columns (→) · from 0</p>
+                <div
+                  className="cnn-grid"
+                  ref={sourceMapRef}
+                  style={{
+                    gridTemplateColumns: `repeat(${size}, 1fr)`,
+                    visibility:
+                      overviewAmount > 0 && flightStyle ? 'hidden' : undefined,
+                  }}
                 >
-                  {v}
-                </span>
-              ))}
+                  {output.flat().map((value, i) => (
+                    <button
+                      key={i}
+                      className={
+                        'cnn-cell ' + (i === active ? 'selected-output' : '')
+                      }
+                      style={
+                        order.slice(0, revealed).includes(i)
+                          ? paint(value, scale)
+                          : {}
+                      }
+                      aria-label={`Follow output row ${Math.floor(i / size)}, column ${i % size}${order.slice(0, revealed).includes(i) ? `, value ${format(value)}` : ', not calculated yet'}`}
+                      aria-pressed={selected === i}
+                      onClick={() => choose(i)}
+                    >
+                      {order.slice(0, revealed).includes(i)
+                        ? format(value)
+                        : '·'}
+                    </button>
+                  ))}
+                </div>
+                <p className="cnn-caption">
+                  Selected output: [{Math.floor(selected / size)},{' '}
+                  {selected % size}]
+                </p>
+              </div>
             </div>
-            <p className="cnn-caption">3 × 3 · bias = 0</p>
+            <div className="cnn-calculation">
+              <span className="section-label">
+                PATCH → PRODUCTS → SUM · OUTPUT [{row}, {col}]
+              </span>
+              <div className="cnn-products">
+                {terms.map((term, i) => (
+                  <span key={i} className={i < count ? 'is-revealed' : ''}>
+                    {format(term.value)} × ({term.weight})
+                    <b>{i < count ? format(term.product) : '—'}</b>
+                  </span>
+                ))}
+              </div>
+              <div className="cnn-sum">
+                <span>
+                  {operationProgress < 25
+                    ? `${count} of 9 products`
+                    : 'All 9 products + zero bias'}
+                </span>
+                <strong>
+                  {count === 0
+                    ? 'Ready to multiply'
+                    : `${operationProgress < 25 ? 'Running sum' : 'Output'} = ${format(sum)}`}
+                </strong>
+              </div>
+            </div>
           </div>
-          <span className="cnn-operator" aria-hidden="true">
-            →
-          </span>
-          <div className="cnn-matrix-block">
-            <h3>
-              Feature map <small>computed output</small>
-            </h3>
-            <p className="cnn-axis">Rows (↓) · Columns (→) · from 0</p>
+          {
             <div
-              className="cnn-grid"
-              style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
+              className="cnn-overview-scene"
+              inert={overviewAmount < 0.5}
+              aria-hidden={overviewAmount < 0.5}
+            >
+              <ChannelOverview
+                maps={maps}
+                convolution
+                selectedGridRef={targetMapRef}
+                hideSelectedGrid={overviewAmount < 1}
+                channel={kernelIndex}
+                amount={Math.max(
+                  0,
+                  Math.min(1, (overviewAmount - 0.85) / 0.15),
+                )}
+                onInspect={(c, i) => {
+                  setKernelIndex(c);
+                  choose(i);
+                }}
+              />
+            </div>
+          }
+          {overviewAmount > 0 && overviewAmount < 1 && flightStyle && (
+            <div
+              className="cnn-map-flight"
+              aria-hidden="true"
+              style={{
+                ...flightStyle,
+                gridTemplateColumns: `repeat(${size}, 1fr)`,
+              }}
             >
               {output.flat().map((value, i) => (
-                <button
-                  key={i}
-                  className={
-                    'cnn-cell ' + (i === active ? 'selected-output' : '')
-                  }
-                  style={
-                    order.slice(0, revealed).includes(i)
-                      ? paint(value, scale)
-                      : {}
-                  }
-                  aria-label={`Follow output row ${Math.floor(i / size)}, column ${i % size}${order.slice(0, revealed).includes(i) ? `, value ${format(value)}` : ', not calculated yet'}`}
-                  aria-pressed={selected === i}
-                  onClick={() => choose(i)}
-                >
-                  {order.slice(0, revealed).includes(i) ? format(value) : '·'}
-                </button>
+                <span className="cnn-cell" key={i} style={paint(value, scale)}>
+                  {format(value)}
+                </span>
               ))}
-            </div>
-            <p className="cnn-caption">
-              Selected output: [{Math.floor(selected / size)}, {selected % size}
-              ]
-            </p>
-          </div>
-        </div>
-        <div className="cnn-calculation">
-          <span className="section-label">
-            PATCH → PRODUCTS → SUM · OUTPUT [{row}, {col}]
-          </span>
-          <div className="cnn-products">
-            {terms.map((term, i) => (
-              <span key={i} className={i < count ? 'is-revealed' : ''}>
-                {format(term.value)} × ({term.weight})
-                <b>{i < count ? format(term.product) : '—'}</b>
+              <span
+                className="cnn-flight-label"
+                style={{
+                  opacity: Math.max(
+                    0,
+                    1 - Math.abs(overviewAmount - 0.4) / 0.25,
+                  ),
+                }}
+              >
+                This same map becomes feature channel {kernelIndex}
               </span>
-            ))}
-          </div>
-          <div className="cnn-sum">
-            <span>
-              {progress < 45
-                ? `${count} of 9 products`
-                : 'All 9 products + zero bias'}
-            </span>
-            <strong>
-              {count === 0
-                ? 'Ready to multiply'
-                : `${progress < 45 ? 'Running sum' : 'Output'} = ${format(sum)}`}
-            </strong>
-          </div>
+            </div>
+          )}
         </div>
         <div className="transformation cnn-playback">
           <div className="transformation-controls">
@@ -306,7 +397,7 @@ export default function ConvolutionStep({
               step="0.1"
               value={progress}
               aria-label="Convolution progress"
-              aria-valuetext={`${Math.round(progress)} percent: ${stage}`}
+              aria-valuetext={`${Math.round(progress)} percent: ${overviewAmount > 0 ? (overviewAmount < 0.48 ? '4 · This map is one feature channel' : '5 · Another filter, another channel') : stage}`}
               onChange={(e) => {
                 setPlaying(false);
                 setProgress(Number(e.target.value));
@@ -332,7 +423,10 @@ export default function ConvolutionStep({
           image builds a feature map. A positive value here means more
           brightness on the{' '}
           {kernelIndex === 0 ? 'right than the left' : 'bottom than the top'} of
-          that patch; it is not a prediction or a probability.
+          that patch; it is not a prediction or a probability. Both maps pass
+          through ReLU and pooling separately. Later, the dense layer combines
+          values from both. Two filters keep this example small; trained CNNs
+          usually learn many filters from data.
         </p>
       </section>
       {navigation}

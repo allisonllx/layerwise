@@ -1,6 +1,6 @@
 'use client';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
+/* eslint-disable nextjs/no-html-link-for-pages */
 import { Layers3, ArrowLeft, ArrowRight } from 'lucide-react';
 import LessonSwitcher from '../../components/lesson-switcher';
 import PipelineShape from './pipeline-shape';
@@ -26,6 +26,7 @@ export default function FullCnnLesson() {
     d = describeStage(model, step, channel, selected);
   function go(n: number) {
     setStep(n);
+    if (n === 0) setChannel(0);
     if (n > 0)
       setSelected((i) => Math.min(i, model.convolution[0].length ** 2 - 1));
     setWelcome(false);
@@ -59,10 +60,10 @@ export default function FullCnnLesson() {
   return (
     <main className="cnn-lesson">
       <header className="topbar">
-        <Link href="/" className="brand">
+        <a href="/" className="brand">
           <Layers3 size={23} />
           layerwise<span className="prototype-label">EXPLORER</span>
-        </Link>
+        </a>
         <span className="lesson-title">
           02 <span>/</span> Inside a CNN
         </span>
@@ -150,9 +151,11 @@ export default function FullCnnLesson() {
           </div>
           <div className="journey-question">
             <span className="section-label">
-              {step < 5
-                ? `FOLLOWING CHANNEL ${step === 0 ? 0 : channel} · LOCATION [${d.r}, ${d.c}]`
-                : 'COMBINING BOTH CHANNELS'}
+              {step === 0
+                ? 'GRAYSCALE INPUT · ONE CHANNEL'
+                : step < 5
+                  ? `INSPECTING FEATURE CHANNEL ${channel} · TWO MAPS · LOCATION [${d.r}, ${d.c}]`
+                  : 'COMBINING BOTH FEATURE CHANNELS'}
             </span>
             <p>{current.question}</p>
             <span className="watch-for">Watch for: {current.watch}</span>
@@ -171,29 +174,33 @@ export default function FullCnnLesson() {
                 ))}
               </select>
             </label>
-            {step !== 1 && step > 0 && step < 5 && (
-              <label>
-                Inspect channel
-                <select
-                  value={channel}
-                  onChange={(e) => setChannel(Number(e.target.value))}
-                >
-                  {kernels.map((k, i) => (
-                    <option value={i} key={k.name}>
-                      {i} · {k.name}
-                    </option>
+            {step > 0 && step < 5 && (
+              <fieldset className="cnn-channel-picker">
+                <legend className="section-label">Inspect channel</legend>
+                <div className="cnn-channel-options">
+                  {kernels.map((kernel, i) => (
+                    <button
+                      key={i}
+                      className="secondary"
+                      aria-pressed={channel === i}
+                      onClick={() => setChannel(i)}
+                    >
+                      <span>Channel {i}</span>
+                      <small>{kernel.name}</small>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </fieldset>
             )}
             <span className="muted">
-              Convolution stride {stride} · both channels continue through the
-              model
+              {step === 0
+                ? 'One grayscale channel feeds both convolution filters.'
+                : `Two filters create feature channels 0 and 1. Inspecting one does not remove the other. Stride ${stride}.`}
             </span>
           </div>
           {step === 1 ? (
             <ConvolutionStep
-              key={`${example}`}
+              key={`${example}-${channel}`}
               image={model.input}
               kernelIndex={channel}
               setKernelIndex={setChannel}

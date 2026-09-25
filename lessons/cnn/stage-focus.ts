@@ -10,6 +10,7 @@ export function stageFocus(
   feature: number,
   progress: number,
 ) {
+  const focusEnd = step >= 5 ? 30 : 12;
   const initial = describeStage(model, step, channel, selected);
   const count =
     step === 0
@@ -34,9 +35,12 @@ export function stageFocus(
     ...Array.from({ length: count }, (_, i) => i).filter((i) => i !== chosen),
   ];
   const visible =
-    progress < 45
+    progress < focusEnd
       ? 0
-      : Math.min(count, 1 + Math.floor(((progress - 45) / 55) * count));
+      : Math.min(
+          count,
+          1 + Math.floor(((progress - focusEnd) / (100 - focusEnd)) * count),
+        );
   const output = order[Math.max(0, visible - 1)];
   const poolSide = model.pooled[0].length,
     convSide = model.convolution[0].length;
@@ -56,7 +60,7 @@ export function stageFocus(
   ];
   const products = Math.min(
     featureOrder.length,
-    Math.floor((progress / 45) * featureOrder.length),
+    Math.floor((progress / focusEnd) * featureOrder.length),
   );
   const activeFeature = featureOrder[Math.max(0, products - 1)];
   const sources =
@@ -70,11 +74,12 @@ export function stageFocus(
       : step === 4
         ? [local]
         : step === 5
-          ? progress >= 45
+          ? progress >= focusEnd
             ? featureOrder
             : [activeFeature]
           : [output];
   return {
+    focusEnd,
     order,
     visible,
     output,

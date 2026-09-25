@@ -1,4 +1,5 @@
-import Link from 'next/link';
+// Full page links avoid the current Vinext production client-navigation failure.
+/* eslint-disable nextjs/no-html-link-for-pages */
 export default function LessonSwitcher({
   current,
 }: {
@@ -6,15 +7,12 @@ export default function LessonSwitcher({
 }) {
   return (
     <nav className="lesson-switcher" aria-label="Choose a model lesson">
-      <Link
-        href="/"
-        aria-current={current === 'transformer' ? 'page' : undefined}
-      >
+      <a href="/" aria-current={current === 'transformer' ? 'page' : undefined}>
         Transformer
-      </Link>
-      <Link href="/cnn" aria-current={current === 'cnn' ? 'page' : undefined}>
+      </a>
+      <a href="/cnn" aria-current={current === 'cnn' ? 'page' : undefined}>
         CNN
-      </Link>
+      </a>
     </nav>
   );
 }

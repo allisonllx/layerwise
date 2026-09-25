@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { type CnnModel, format } from './model';
 import { steps } from './stages';
+import ChannelOverview from './channel-overview';
+import { useMapFlight } from './use-map-flight';
+import { useSceneHeight } from './use-scene-height';
 import { stageFocus } from './stage-focus';
 import { heatmapCell } from '../../lib/heatmap';
 export default function StagePlayer({
@@ -26,6 +29,27 @@ export default function StagePlayer({
   const [feature, setFeature] = useState(0);
   const active = playing && progress < 100;
   const canvas = useRef<HTMLDivElement>(null);
+  const hasOverview = step >= 2 && step <= 4;
+  const overviewAmount = hasOverview
+    ? Math.max(0, Math.min(1, (progress - 65) / 35))
+    : 0;
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const sourceMapRef = useRef<HTMLDivElement>(null);
+  const targetMapRef = useRef<HTMLDivElement>(null);
+  const flightStyle = useMapFlight(
+    sceneRef,
+    sourceMapRef,
+    targetMapRef,
+    overviewAmount,
+    step === 4,
+  );
+  const sceneStyle = useSceneHeight(
+    sceneRef,
+    Math.min(1, overviewAmount / 0.36),
+  );
+  const operationProgress = hasOverview
+    ? Math.min(100, progress / 0.65)
+    : progress;
   const frame = stageFocus(
     model,
     step,
@@ -33,19 +57,25 @@ export default function StagePlayer({
     selected,
     classIndex,
     feature,
-    progress,
+    operationProgress,
   );
   const d = frame.detail;
   const activeClass = frame.output;
   const activeFeature = frame.activeFeature;
   useEffect(() => {
     if (!active) return;
-    const timer = setInterval(
-      () => setProgress((p) => Math.min(100, p + 1)),
-      75,
-    );
-    return () => clearInterval(timer);
-  }, [active]);
+    let previous = performance.now();
+    let timer: number;
+    const tick = () => {
+      const now = performance.now();
+      const delta = (now - previous) / (hasOverview ? 85 : 60);
+      previous = now;
+      setProgress((p) => Math.min(100, p + delta));
+      timer = requestAnimationFrame(tick);
+    };
+    timer = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(timer);
+  }, [active, hasOverview]);
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) setPlaying(false);
@@ -88,12 +118,18 @@ export default function StagePlayer({
     0.1,
     ...source.flat().map(Math.abs),
     ...target.flat().map(Math.abs),
+    ...(step === 2 ? model.activated : model.pooled).flat(2).map(Math.abs),
   );
   function grid(matrix: number[][], isOutput: boolean) {
     return (
       <div
         className="cnn-stage-grid"
+        ref={isOutput && hasOverview ? sourceMapRef : undefined}
         style={{
+          visibility:
+            isOutput && overviewAmount > 0 && flightStyle
+              ? 'hidden'
+              : undefined,
           gridTemplateColumns: `repeat(${matrix[0].length}, minmax(48px,1fr))`,
         }}
       >
@@ -187,9 +223,15 @@ export default function StagePlayer({
       <div className="canvas-toolbar">
         <span>
           <i className="live-dot" />
-          {progress < 45
-            ? 'Follow one calculation'
-            : 'Extend to the complete result'}
+          {overviewAmount > 0
+            ? overviewAmount < 0.48
+              ? 'Keep the completed result in view'
+              : step === 4
+                ? 'Both channels feed this same vector'
+                : 'See both feature channels'
+            : operationProgress < frame.focusEnd
+              ? 'Follow one calculation'
+              : 'Extend to the complete result'}
         </span>
         <button
           className="secondary"
@@ -201,72 +243,173 @@ export default function StagePlayer({
           Show complete result
         </button>
       </div>
-      <div className="cnn-stage-pair">
-        <section>
-          <h3 className="cnn-input-tone">
-            {step === 0
-              ? 'Grayscale image'
-              : step === 2
-                ? 'Convolution output'
-                : step === 3
-                  ? 'After ReLU'
-                  : step === 4
-                    ? `Pooled channel ${frame.displayChannel}`
-                    : step === 5
-                      ? 'All pooled features'
-                      : 'Class logits'}
-          </h3>
-          <p className="cnn-axis">
-            {step < 5 ? 'Rows (↓) · Columns (→)' : 'Features / classes (→)'} ·
-            indices from 0
-          </p>
-          {grid(source, false)}
-        </section>
-        <span className="cnn-operator" aria-hidden="true">
-          →
-        </span>
-        <section>
-          <h3 className="cnn-output-tone">
-            {step === 0 ? 'Pixel values' : steps[step].short + ' output'}
-          </h3>
-          <p className="cnn-axis">
-            {step === 4
-              ? 'Channel 0, then channel 1'
-              : step >= 5
-                ? 'Class A · Class B'
-                : 'Same channel · rows (↓), columns (→)'}
-          </p>
-          {grid(target, true)}
-        </section>
-      </div>
-      <div className="cnn-stage-explanation">
-        <span className="section-label">
-          {step === 4 ? 'PRESERVE THE VALUE' : 'CURRENT CALCULATION'}
-        </span>
-        <pre>
-          {step === 5
-            ? `Class ${activeClass === 0 ? 'A' : 'B'} · feature ${activeFeature}: ${format(model.flattened[activeFeature])} × (${format(model.weights[activeFeature][activeClass])}) = ${format(model.flattened[activeFeature] * model.weights[activeFeature][activeClass])}\n${frame.products} of ${model.flattened.length} products added · sum + bias = ${format(model.bias[activeClass] + frame.featureOrder.slice(0, frame.products).reduce((sum, i) => sum + model.flattened[i] * model.weights[i][activeClass], 0))}`
-            : step === 6
-              ? progress < 25
-                ? `Subtract max: ${format(model.logits[activeClass])} − ${format(Math.max(...model.logits))} = ${format(model.logits[activeClass] - Math.max(...model.logits))}`
-                : progress < 45
-                  ? `Exponentiate: exp(${format(model.logits[activeClass] - Math.max(...model.logits))}) = ${format(model.exponentials[activeClass])}`
-                  : `Normalise: ${format(model.exponentials[activeClass])} / ${format(model.denominator)} = ${format(model.probabilities[activeClass])}`
-              : d.calculation}
-        </pre>
-        {step === 4 && (
-          <p>
-            Both channels appear in the vector. Features 0–
-            {model.flattened.length / 2 - 1} come from channel 0; the remaining
-            features come from channel 1.
-          </p>
+      <div
+        className="cnn-scene"
+        ref={sceneRef}
+        style={
+          sceneStyle && flightStyle && overviewAmount > 0
+            ? {
+                height: Math.max(
+                  sceneStyle.height,
+                  flightStyle.top + flightStyle.height + 24,
+                ),
+              }
+            : sceneStyle
+        }
+      >
+        <div
+          className="cnn-focus-scene"
+          aria-hidden={overviewAmount >= 0.5}
+          inert={overviewAmount >= 0.5}
+          style={{
+            opacity: Math.max(0, 1 - overviewAmount / 0.22),
+          }}
+        >
+          <div className="cnn-stage-pair">
+            <section>
+              <h3 className="cnn-input-tone">
+                {step === 0
+                  ? 'Grayscale image'
+                  : step === 2
+                    ? 'Convolution output'
+                    : step === 3
+                      ? 'After ReLU'
+                      : step === 4
+                        ? `Pooled channel ${frame.displayChannel}`
+                        : step === 5
+                          ? 'All pooled features'
+                          : 'Class logits'}
+              </h3>
+              <p className="cnn-axis">
+                {step < 5 ? 'Rows (↓) · Columns (→)' : 'Features / classes (→)'}{' '}
+                · indices from 0
+              </p>
+              {grid(source, false)}
+            </section>
+            <span className="cnn-operator" aria-hidden="true">
+              →
+            </span>
+            <section>
+              <h3 className="cnn-output-tone">
+                {step === 0 ? 'Pixel values' : steps[step].short + ' output'}
+              </h3>
+              <p className="cnn-axis">
+                {step === 4
+                  ? 'Channel 0, then channel 1'
+                  : step >= 5
+                    ? 'Class A · Class B'
+                    : 'Same channel · rows (↓), columns (→)'}
+              </p>
+              {grid(target, true)}
+            </section>
+          </div>
+          <div className="cnn-stage-explanation">
+            <span className="section-label">
+              {step === 4 ? 'PRESERVE THE VALUE' : 'CURRENT CALCULATION'}
+            </span>
+            <pre>
+              {step === 5
+                ? `Class ${activeClass === 0 ? 'A' : 'B'} · feature ${activeFeature}: ${format(model.flattened[activeFeature])} × (${format(model.weights[activeFeature][activeClass])}) = ${format(model.flattened[activeFeature] * model.weights[activeFeature][activeClass])}\n${frame.products} of ${model.flattened.length} products added · sum + bias = ${format(model.bias[activeClass] + frame.featureOrder.slice(0, frame.products).reduce((sum, i) => sum + model.flattened[i] * model.weights[i][activeClass], 0))}`
+                : step === 6
+                  ? operationProgress < 15
+                    ? `Subtract max: ${format(model.logits[activeClass])} − ${format(Math.max(...model.logits))} = ${format(model.logits[activeClass] - Math.max(...model.logits))}`
+                    : operationProgress < frame.focusEnd
+                      ? `Exponentiate: exp(${format(model.logits[activeClass] - Math.max(...model.logits))}) = ${format(model.exponentials[activeClass])}`
+                      : `Normalise: ${format(model.exponentials[activeClass])} / ${format(model.denominator)} = ${format(model.probabilities[activeClass])}`
+                  : d.calculation}
+            </pre>
+            {step === 4 && (
+              <p>
+                Both channels appear in the vector. Features 0–
+                {model.flattened.length / 2 - 1} come from channel 0; the
+                remaining features come from channel 1.
+              </p>
+            )}
+            {step === 5 && (
+              <p>
+                Weights: first-channel features use [0.30, −0.20];
+                second-channel features use [−0.20, 0.30]. Bias = [0.10, −0.10].
+              </p>
+            )}
+          </div>
+        </div>
+        {hasOverview && (
+          <div
+            className="cnn-overview-scene"
+            inert={overviewAmount < 0.5}
+            aria-hidden={overviewAmount < 0.5}
+          >
+            <ChannelOverview
+              maps={step === 2 ? model.activated : model.pooled}
+              channel={channel}
+              amount={Math.max(0, Math.min(1, (overviewAmount - 0.85) / 0.15))}
+              colorScale={scale}
+              selectedGridRef={step === 4 ? undefined : targetMapRef}
+              vectorRef={step === 4 ? targetMapRef : undefined}
+              hideSelectedGrid={step !== 4 && overviewAmount < 1}
+              hideVector={step === 4 && overviewAmount < 1}
+              flatten={step === 4}
+              onInspect={(c, i) => {
+                onChannel(c);
+                const side = model.pooled[0].length;
+                onSelect(
+                  step === 2
+                    ? i
+                    : Math.floor(i / side) * 2 * model.convolution[0].length +
+                        (i % side) * 2,
+                );
+                setProgress(0);
+                setPlaying(false);
+              }}
+            />
+          </div>
         )}
-        {step === 5 && (
-          <p>
-            Weights: first-channel features use [0.30, −0.20]; second-channel
-            features use [−0.20, 0.30]. Bias = [0.10, −0.10].
-          </p>
-        )}
+        {hasOverview &&
+          overviewAmount > 0 &&
+          overviewAmount < 1 &&
+          flightStyle && (
+            <div
+              className={
+                'cnn-map-flight ' + (step === 4 ? 'cnn-vector-flight' : '')
+              }
+              aria-hidden="true"
+              style={{
+                ...flightStyle,
+                gridTemplateColumns: `repeat(${target[0].length}, ${step === 4 ? 'minmax(48px,1fr)' : '1fr'})`,
+                gap: step === 4 ? 6 : 6 - 2 * overviewAmount,
+                padding: step === 4 ? 4 : 4 * (1 - overviewAmount),
+              }}
+            >
+              {target.flat().map((value, i) => {
+                const fill = heatmapCell(value, scale, false);
+                return (
+                  <span
+                    className="cnn-cell"
+                    key={i}
+                    style={{
+                      background: fill.color,
+                      color: fill.lightText ? '#e5eaf0' : '#0d1318',
+                    }}
+                  >
+                    {format(value)}
+                  </span>
+                );
+              })}
+              {step !== 4 && (
+                <span
+                  className="cnn-flight-label"
+                  style={{
+                    opacity: Math.max(
+                      0,
+                      1 - Math.abs(overviewAmount - 0.4) / 0.25,
+                    ),
+                  }}
+                >
+                  This result stays in feature channel {channel}
+                </span>
+              )}
+            </div>
+          )}
       </div>
       <div className="transformation cnn-playback">
         <div className="transformation-controls">

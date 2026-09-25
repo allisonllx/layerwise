@@ -47,6 +47,8 @@ The example has a 6 × 6 grayscale input, two hand-chosen 3 × 3 contrast filter
 
 Inspect either channel, follow a convolution cell through ReLU and its pooling window, then locate its value in the flattened vector. Select a class or feature in the dense stage to inspect its contribution. Softmax shows shifting, exponentiation and normalisation. Class A/B are demonstration labels and the untrained model’s probabilities are not meaningful predictions.
 
+Convolution follows its completed feature map into the matching channel card before revealing the other filter’s map. ReLU and pooling carry their completed map into the corresponding channel card too. Flattening keeps its completed vector visible as both source maps are revealed. Select a cell in either overview map to return to its calculation; the inspected feature channel carries into the next step. The input image has its own single grayscale channel, before the two filters create two feature channels.
+
 Playback starts paused, supports scrubbing and complete-result shortcuts, and pauses when the canvas leaves view or the tab is hidden. Each step retains optional origins, coloured dimensions, pseudocode and arithmetic. Prediction checks ask about ReLU, flattening and confidence without blocking navigation.
 
 ## About the transformer model
