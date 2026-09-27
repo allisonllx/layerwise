@@ -1,4 +1,6 @@
 'use client';
+import { transformerStepIds } from '../../lib/lesson-catalog';
+import { useLessonLink, replaceLessonStep } from '../../lib/use-lesson-link';
 import LessonSwitcher from '../../components/lesson-switcher';
 import {
   useCallback,
@@ -62,11 +64,13 @@ export default function Home() {
     current = steps[step];
   const navigate = useCallback((n: number) => {
     setStep(Math.max(0, Math.min(11, n)));
+    replaceLessonStep(transformerStepIds, Math.max(0, Math.min(11, n)));
     setShowWelcome(false);
     setSelection(null);
     setPhase(1);
     setNavigation((n) => n + 1);
   }, []);
+  useLessonLink(transformerStepIds, navigate);
   useLayoutEffect(() => {
     if (!navigation) return;
     const target = showWelcome ? orientationStart.current : lessonStart.current;
@@ -244,7 +248,7 @@ export default function Home() {
           01 <span>/</span> Inside a transformer
         </span>
         <div className="header-tools">
-          <LessonSwitcher current="transformer" />
+          <LessonSwitcher />
           <button className="orientation-reopen" onClick={openWelcome}>
             How to follow along
           </button>
@@ -585,7 +589,8 @@ export default function Home() {
           <p className="rounding-note">
             Displayed numbers are rounded; calculations use full precision.
             Adding the displayed values may therefore differ slightly from the
-            shown result—for example, −1.05 + (−0.05) may display a result of −1.09.
+            shown result—for example, −1.05 + (−0.05) may display a result of
+            −1.09.
           </p>
           <div className="heatmap-legend" aria-label="Heatmap colour scale">
             <span>

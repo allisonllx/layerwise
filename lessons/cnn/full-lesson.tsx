@@ -1,4 +1,6 @@
 'use client';
+import { cnnStepIds } from '../../lib/lesson-catalog';
+import { useLessonLink, replaceLessonStep } from '../../lib/use-lesson-link';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 /* eslint-disable nextjs/no-html-link-for-pages */
 import { Layers3, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -24,7 +26,9 @@ export default function FullCnnLesson() {
   );
   const current = steps[step],
     d = describeStage(model, step, channel, selected);
+  useLessonLink(cnnStepIds, go);
   function go(n: number) {
+    replaceLessonStep(cnnStepIds, n);
     setStep(n);
     if (n === 0) setChannel(0);
     if (n > 0)
@@ -67,7 +71,7 @@ export default function FullCnnLesson() {
         <span className="lesson-title">
           02 <span>/</span> Inside a CNN
         </span>
-        <LessonSwitcher current="cnn" />
+        <LessonSwitcher />
       </header>
       <div className="workspace">
         <aside className="architecture">

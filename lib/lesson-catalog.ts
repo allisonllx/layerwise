@@ -1,0 +1,90 @@
+export const transformerStepIds = [
+  'embeddings',
+  'normalization',
+  'projections',
+  'heads',
+  'axes',
+  'attention',
+  'mask-softmax',
+  'value-mixture',
+  'output-projection',
+  'residual',
+  'feed-forward',
+  'prediction',
+];
+export const cnnStepIds = [
+  'input',
+  'convolution',
+  'relu',
+  'pooling',
+  'flatten',
+  'class-scores',
+  'softmax',
+];
+export const clipStepIds = [
+  'encoders',
+  'similarity',
+  'contrastive-learning',
+  'cross-entropy',
+  'sgd',
+  'inference',
+];
+export const lessons = [
+  {
+    id: 'transformer',
+    title: 'Inside a Transformer',
+    kind: 'Model',
+    href: '/transformer',
+    steps: 12,
+    question: 'How does a token gather context?',
+    description:
+      'Follow one token through attention, feature transformations and a next-token prediction.',
+    unit: 'One token',
+    scope: 'Forward pass · illustrative weights',
+    prerequisites: ['Vectors and matrices', 'Weighted sums'],
+    concepts: [
+      { name: 'Embeddings', step: 'embeddings' },
+      { name: 'Self-attention', step: 'attention' },
+      { name: 'Causal masking', step: 'mask-softmax' },
+      { name: 'Residual connections', step: 'residual' },
+    ],
+  },
+  {
+    id: 'cnn',
+    title: 'Inside a CNN',
+    kind: 'Model',
+    href: '/cnn',
+    steps: 7,
+    question: 'How do pixels become class scores?',
+    description:
+      'Follow an image patch into feature maps, then see how those features contribute to a classifier.',
+    unit: 'One image patch',
+    scope: 'Forward pass · illustrative weights',
+    prerequisites: ['Weighted sums'],
+    concepts: [
+      { name: 'Convolution', step: 'convolution' },
+      { name: 'ReLU', step: 'relu' },
+      { name: 'Max pooling', step: 'pooling' },
+      { name: 'Softmax', step: 'softmax' },
+    ],
+  },
+  {
+    id: 'clip',
+    title: 'Inside CLIP',
+    kind: 'Method',
+    href: '/clip',
+    steps: 6,
+    question: 'How do images and words learn to align?',
+    description:
+      'Follow paired examples from similarity to a contrastive loss, a weight update and frozen-encoder inference.',
+    unit: 'One image–caption pair',
+    scope: 'Toy training + inference · prototype',
+    prerequisites: ['Vectors and dot products'],
+    concepts: [
+      { name: 'Contrastive learning', step: 'contrastive-learning' },
+      { name: 'Cross-entropy loss', step: 'cross-entropy' },
+      { name: 'SGD', step: 'sgd' },
+      { name: 'Cosine similarity', step: 'similarity' },
+    ],
+  },
+];

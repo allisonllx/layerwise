@@ -105,7 +105,8 @@ React, TypeScript, Vinext/Vite, Tailwind CSS, SVG visualisations, and Lucide ico
 
 ```text
 app/
-  page.tsx                  Transformer route (/)
+  page.tsx                  Lesson library (/)
+  transformer/page.tsx      Transformer walkthrough (/transformer)
   cnn/page.tsx              CNN walkthrough route (/cnn)
   globals.css               Shared visual language and existing lesson styles
 lessons/
@@ -122,7 +123,7 @@ lessons/
     styles.css              CNN-specific layout
     NOTES.md                Trial question, scope and verification
 components/
-  lesson-switcher.tsx       Shared model navigation
+  lesson-switcher.tsx       Shared All lessons link
   ui/                       General UI primitives
 lib/
   heatmap.ts                Shared heatmap colour mapping
@@ -132,7 +133,7 @@ DESIGN.md                   Reusable design guide backed by local Incline feedba
 
 ## Current scope
 
-This is an exploratory learning prototype with a twelve-step transformer lesson and a seven-step CNN walkthrough. It does not yet import model files or papers, simulate training, or provide training, deeper CNN architectures, VAE, or video lessons. The current visualisations use interactive 2D grids and animations.
+This is an exploratory learning prototype with a twelve-step transformer lesson and a seven-step CNN walkthrough. A separate CLIP prototype includes a small numerical training example. It does not yet import model files or papers, train real models, or provide deeper CNN architectures, VAE, or video lessons. The current visualisations use interactive 2D grids and animations.
 
 Future directions include additional architectures, richer input examples, and connecting a paper’s architecture to its implementation. Feedback on what remains confusing is especially useful for shaping those lessons.
 
@@ -141,3 +142,21 @@ Future directions include additional architectures, richer input examples, and c
 Run `node scripts/check-transitions.cjs` to check every new transition against the model across all examples, tokens, heads, projection choices and MLP stages.
 
 Run `node scripts/check-cnn.cjs` for independent convolution fixtures covering both kernel orientations, the complete feature map, stride and boundary patches.
+
+## Future learning experiences
+
+See [the learning roadmap](LEARNING-ROADMAP.md) for the proposed CLIP experiment, training/inference journeys, prerequisite detours and eventual reusable skill. These are planned directions, not implemented features.
+
+### CLIP paced lesson prototype
+
+`/clip` follows six learner-paced steps: encode paired inputs, compare the batch, identify targets, calculate symmetric contrastive loss, update both encoders, and use frozen encoders for inference. Each step starts paused and supports Play/Pause/Replay, scrubbing, a complete-result shortcut and optional depth. Playback never advances the lesson automatically.
+
+The cat, bicycle and tree use supplied three-number features. Two trainable 3 × 3 linear encoders, unit normalization, a fixed score scale of 5, bidirectional cross-entropy and SGD at learning rate 0.1 form a real, deterministic toy calculation. Select any weight to inspect its gradient and update. Inference uses the snapshot after 40 updates and a held-out toy feature vector; candidate removal changes probabilities without retraining. This is not a pretrained CLIP checkpoint, pixel/text processing, or evidence of real-world generalization.
+
+Run `node scripts/check-clip.cjs` to check all encoder gradients against independent finite differences, normalization, uniform-score loss, descent over the 40 updates, and inference with candidate subsets. See [the lesson notes](lessons/clip/STORYBOARD.md) for the prototype’s scope and sources.
+
+### Lesson library and concept links
+
+The landing page at `/` lists the available Transformer, CNN and CLIP lessons, with a central question, the followed example, taught concepts and separate helpful prerequisites. Search matches lesson names and covered concepts. Concept links open the relevant step, for example `/transformer#attention`, `/cnn#convolution` and `/clip#cross-entropy`. The Transformer now lives at `/transformer`; all lessons link back to the library.
+
+`lib/lesson-catalog.ts` holds library metadata and stable step slugs. Only concepts actually taught in the current lessons are listed. Standalone concept lessons and prerequisite paths remain future work.
