@@ -197,3 +197,10 @@ A library now replaces the top-level model switcher. Lessons can represent a mod
 Teach shared concepts in concrete model contexts first, with stable links to those steps. Separate taught concepts from prerequisites and passing mentions. Extract a standalone concept lesson when it needs a substantial detour or a comparison across models; do not duplicate explanations merely to populate a category. Encoder–decoder, Adam and KL divergence are future coverage, not current library tags.
 
 Implemented: library cards, search by lesson/concept, covered-concept links, helpful-prerequisite labels, All lessons navigation, and stable step URLs. Future: standalone concept lessons, reusable prerequisite detours, richer task and training/inference browsing as coverage grows.
+
+
+## DDPM trial — implemented
+
+The next generative-method example is `/diffusion`: an unconditional, trained 8 × 8 digit DDPM with a small U-Net. Six paced steps separate forward noising, backbone inspection, noise-prediction loss, recorded training, a reverse sampling calculation, and full generation. This tests how Layerwise teaches a reusable encoder–decoder concept inside a method, and distinguishes optimizer updates from sampling timesteps.
+
+Gather feedback on this trial before expanding to latent diffusion, text conditioning or DiT. Mamba remains a later architecture experiment. See `lessons/diffusion/NOTES.md` for exact scope, data and simplifications.

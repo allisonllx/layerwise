@@ -1,4 +1,5 @@
 'use client';
+import ModelScale from '../../components/model-scale';
 import { clipStepIds } from '../../lib/lesson-catalog';
 import { useLessonLink, replaceLessonStep } from '../../lib/use-lesson-link';
 /* eslint-disable nextjs/no-html-link-for-pages */
@@ -827,6 +828,7 @@ export default function ClipLesson() {
             </button>
           </nav>
           <h2 className="clip-deeper-title">Go deeper</h2>
+          <ModelScale lesson="clip" />
           <details className="clip-details">
             <summary>Where do these inputs and weights come from?</summary>
             <p>

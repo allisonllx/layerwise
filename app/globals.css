@@ -1864,7 +1864,121 @@ fieldset.intuition-options {
 }
 
 /* Shared lesson navigation; each model owns its diagrams and computation. */
-.lesson-switcher {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:7px;padding:4px;font-size:12px;white-space:nowrap;}
-.lesson-switcher a {display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:4px;color:var(--muted);}
-.lesson-switcher a[aria-current="page"] {background:#19322f;color:var(--cyan);}
-.lesson-switcher small {font-size:10px;color:var(--gold);margin-left:4px;}
+.lesson-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.lesson-switcher a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+.lesson-switcher a[aria-current='page'] {
+  background: #19322f;
+  color: var(--cyan);
+}
+.lesson-switcher small {
+  font-size: 10px;
+  color: var(--gold);
+  margin-left: 4px;
+}
+
+/* Optional bridge from teaching dimensions to a named published model. */
+.model-scale {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 14px 0;
+  background: #0d171b;
+}
+.model-scale > summary {
+  cursor: pointer;
+  padding: 22px;
+  font-size: 14px;
+  color: var(--text);
+}
+.model-scale-body {
+  padding: 0 22px 24px;
+}
+.model-scale-body p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0 0 22px;
+}
+.model-scale-body strong {
+  color: var(--text);
+  font-weight: 500;
+}
+.model-scale-table {
+  overflow-x: auto;
+  margin: 24px 0;
+}
+.model-scale table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: left;
+}
+.model-scale caption {
+  text-align: left;
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 14px;
+}
+.model-scale th,
+.model-scale td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  min-width: 95px;
+}
+.model-scale th {
+  font-weight: 400;
+  color: var(--muted);
+}
+.model-scale td:nth-child(2) {
+  color: var(--cyan);
+}
+.model-scale td:nth-child(3) {
+  color: #b8a7ef;
+}
+.model-scale h3 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 24px 0 12px;
+}
+.model-scale-body .model-scale-source {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+.model-scale a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.model-scale summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .model-scale > summary {
+    padding: 20px 16px;
+  }
+  .model-scale-body {
+    padding: 0 16px 22px;
+  }
+  .model-scale th,
+  .model-scale td {
+    padding: 12px 8px;
+  }
+}

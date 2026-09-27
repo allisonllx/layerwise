@@ -1,4 +1,5 @@
 'use client';
+import ModelScale from '../../components/model-scale';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import ChannelOverview from './channel-overview';
 import { useMapFlight } from './use-map-flight';
@@ -438,6 +439,7 @@ export default function ConvolutionStep({
             picture to the details.
           </p>
         </div>
+        <ModelScale lesson="cnn" />
         <details className="journey-detail">
           <summary>Where did these inputs come from?</summary>
           <div className="cnn-detail-body">

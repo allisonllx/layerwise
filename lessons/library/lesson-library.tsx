@@ -37,6 +37,27 @@ function Preview({ id }: { id: string }) {
             ))}
           </div>
         </>
+      ) : id === 'diffusion' ? (
+        <>
+          <div className="preview-pixels">
+            {Array.from({ length: 25 }, (_, i) => (
+              <i key={i} style={{ opacity: 0.1 + ((i * 17 + 3) % 23) / 26 }} />
+            ))}
+          </div>
+          <span className="preview-arrow">→</span>
+          <div className="preview-pixels">
+            {Array.from({ length: 25 }, (_, i) => (
+              <i
+                key={i}
+                style={{
+                  opacity: [1, 2, 3, 8, 11, 12, 13, 16, 21, 22, 23].includes(i)
+                    ? 0.9
+                    : 0.1,
+                }}
+              />
+            ))}
+          </div>
+        </>
       ) : (
         <>
           <div className="preview-modalities">
@@ -172,7 +193,7 @@ export default function LessonLibrary() {
               <h3>No lesson matches “{query}” yet.</h3>
               <p>
                 Try “attention”, “convolution” or “loss”. The library currently
-                has three lessons.
+                has {lessons.length} lessons.
               </p>
               <button className="secondary" onClick={() => setQuery('')}>
                 Show all lessons

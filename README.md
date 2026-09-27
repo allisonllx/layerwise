@@ -41,7 +41,7 @@ Displayed numbers are rounded, while calculations use full precision. The rounde
 
 ## Follow an image through a CNN
 
-Open `/cnn`, or use the model switcher. Seven connected stages follow **image input → convolution → ReLU → max pooling → flatten → class scores → softmax**. Each stage uses the actual numerical output of the previous one.
+Open `/cnn`, or choose it from the lesson library. Seven connected stages follow **image input → convolution → ReLU → max pooling → flatten → class scores → softmax**. Each stage uses the actual numerical output of the previous one.
 
 The example has a 6 × 6 grayscale input, two hand-chosen 3 × 3 contrast filters, no convolution padding, zero convolution bias, 2 × 2 max pooling with stride 2, and a fixed dense layer with two illustrative classes. Three input examples and convolution stride 1/2 let you see how the whole forward pass changes. Stride 1 produces eight flattened features; stride 2 produces two. The illustrative dense weights follow the same per-channel rule for either size; this is a teaching setup, not resizing a trained classifier.
 
@@ -133,7 +133,7 @@ DESIGN.md                   Reusable design guide backed by local Incline feedba
 
 ## Current scope
 
-This is an exploratory learning prototype with a twelve-step transformer lesson and a seven-step CNN walkthrough. A separate CLIP prototype includes a small numerical training example. It does not yet import model files or papers, train real models, or provide deeper CNN architectures, VAE, or video lessons. The current visualisations use interactive 2D grids and animations.
+This is an exploratory learning prototype with a twelve-step transformer lesson and a seven-step CNN walkthrough. A separate CLIP prototype includes a small numerical training example. A diffusion lesson replays recordings from a trained toy U-Net. The app does not yet import model files or papers, run full neural-network training in the browser, or provide deeper CNN architectures, VAE, or video lessons. The current visualisations use interactive 2D grids and animations.
 
 Future directions include additional architectures, richer input examples, and connecting a paper’s architecture to its implementation. Feedback on what remains confusing is especially useful for shaping those lessons.
 
@@ -157,6 +157,18 @@ Run `node scripts/check-clip.cjs` to check all encoder gradients against indepen
 
 ### Lesson library and concept links
 
-The landing page at `/` lists the available Transformer, CNN and CLIP lessons, with a central question, the followed example, taught concepts and separate helpful prerequisites. Search matches lesson names and covered concepts. Concept links open the relevant step, for example `/transformer#attention`, `/cnn#convolution` and `/clip#cross-entropy`. The Transformer now lives at `/transformer`; all lessons link back to the library.
+The landing page at `/` lists the available Transformer, CNN, CLIP and Diffusion lessons, with a central question, the followed example, taught concepts and separate helpful prerequisites. Search matches lesson names and covered concepts. Concept links open the relevant step, for example `/transformer#attention`, `/cnn#convolution` and `/clip#cross-entropy`. The Transformer now lives at `/transformer`; all lessons link back to the library.
 
 `lib/lesson-catalog.ts` holds library metadata and stable step slugs. Only concepts actually taught in the current lessons are listed. Standalone concept lessons and prerequisite paths remain future work.
+
+### Diffusion: a trained toy DDPM
+
+`/diffusion` has six self-paced steps: add noise, inspect a U-Net, measure noise-prediction error, learn the denoiser, inspect one reverse step, and generate from noise. Select pixels, feature channels, noise levels and recorded seeds. Training and sampling are explicitly separate journeys.
+
+The tiny U-Net was trained for 4,000 Adam updates on 1,500 8 × 8 handwritten digits. The browser uses bundled recordings of its feature maps, predictions, held-out loss and three 100-step sampling runs. No checkpoint download, API or live training is required. Outputs are imperfect digit-like samples; this is not Stable Diffusion or MNIST.
+
+The route is `app/diffusion/page.tsx`; implementation and recordings live in `lessons/diffusion/`. See [scope and provenance](lessons/diffusion/NOTES.md). Run `node scripts/check-diffusion.cjs` to validate the recorded reverse steps and U-Net shape operations. To regenerate the recordings with Python, PyTorch, scikit-learn, NumPy and Pillow installed, run `python3 scripts/train-diffusion.py --steps 4000`.
+
+### Teaching scale and published models
+
+All four lessons include an optional “How big is this in a real model?” comparison under Go deeper. Named references (GPT-2 small, ResNet-18, CLIP ViT-B/32 and Stable Diffusion v1.5) have linked configuration/documentation sources, alongside explanations of which ideas transfer and which architectural changes go beyond scaling up.

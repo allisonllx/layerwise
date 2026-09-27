@@ -1,4 +1,5 @@
 'use client';
+import ModelScale from '../../components/model-scale';
 import { transformerStepIds } from '../../lib/lesson-catalog';
 import { useLessonLink, replaceLessonStep } from '../../lib/use-lesson-link';
 import LessonSwitcher from '../../components/lesson-switcher';
@@ -669,6 +670,7 @@ export default function Home() {
                 the journey above.
               </p>
             </div>
+            <ModelScale lesson="transformer" />
             <details className="journey-detail">
               <summary>Where did these inputs come from?</summary>
               <p className="detail-purpose">

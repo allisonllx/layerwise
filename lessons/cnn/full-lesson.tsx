@@ -1,4 +1,5 @@
 'use client';
+import ModelScale from '../../components/model-scale';
 import { cnnStepIds } from '../../lib/lesson-catalog';
 import { useLessonLink, replaceLessonStep } from '../../lib/use-lesson-link';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -254,6 +255,7 @@ export default function FullCnnLesson() {
                     you want them.
                   </p>
                 </div>
+                <ModelScale lesson="cnn" />
                 <details className="journey-detail">
                   <summary>Where did these inputs come from?</summary>
                   <div className="cnn-detail-body">

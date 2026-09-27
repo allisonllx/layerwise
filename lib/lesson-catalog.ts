@@ -87,4 +87,23 @@ export const lessons = [
       { name: 'Cosine similarity', step: 'similarity' },
     ],
   },
+  {
+    id: 'diffusion',
+    title: 'Inside Diffusion',
+    kind: 'Method',
+    href: '/diffusion',
+    steps: 6,
+    question: 'How can noise become a handwritten digit?',
+    description:
+      'Follow a pixel through noise prediction, a small U-Net and repeated denoising with trained weights.',
+    unit: 'One pixel in an 8 × 8 digit',
+    scope: 'Recorded training + generation · trained toy model',
+    prerequisites: ['Weighted sums', 'Convolution'],
+    concepts: [
+      { name: 'Noise schedule', step: 'noise-schedule' },
+      { name: 'U-Net', step: 'unet' },
+      { name: 'Mean squared error', step: 'noise-prediction' },
+      { name: 'DDPM sampling', step: 'reverse-step' },
+    ],
+  },
 ];

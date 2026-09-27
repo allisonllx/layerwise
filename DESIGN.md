@@ -112,3 +112,8 @@ Use real feedback to revise this guide. Capture exact user reactions and before/
 ## Verification and limits
 
 The current transformer layout and several interactions were inspected in this conversation at desktop and narrow widths before publication. This guide also uses current CSS/source and the local journal. The local CNN convolution trial was subsequently built and inspected at desktop and narrow widths; user feedback on that transfer is still pending. No VAE interface has been built. This document is an agent synthesis requested by the user; it has not received separate line-by-line approval.
+
+
+### Bridge teaching scale to a published model
+
+Under Go deeper, offer “How big is this in a real model?” Keep it collapsed by default. Compare a few meaningful quantities side by side, name the exact model/version, and link primary sources. Explain what carries over and what changes beyond size. Distinguish pixels from latents, feature widths from parameter counts, and illustrative weights from learned weights. A named reference is not a claim about a universal or current typical size.
